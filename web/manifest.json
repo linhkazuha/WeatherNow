@@ -1,6 +1,6 @@
 {
-    "name": "restaurant_app",
-    "short_name": "restaurant_app",
+    "name": "weather_app",
+    "short_name": "weather_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
