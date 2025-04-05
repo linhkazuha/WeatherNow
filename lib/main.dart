@@ -1,122 +1,465 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Weather News',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.grey[100],
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: NewsScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+class NewsArticle {
   final String title;
+  final String description;
+  final String url;
+  final String imageUrl;
+  final String publishedAt;
+  final String source;
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  NewsArticle({
+    required this.title,
+    required this.description,
+    required this.url,
+    required this.imageUrl,
+    required this.publishedAt,
+    required this.source,
+  });
+
+  factory NewsArticle.fromJson(Map<String, dynamic> json) {
+    return NewsArticle(
+      title: json['title'] ?? 'Không có tiêu đề',
+      description: json['description'] ?? 'Không có mô tả',
+      url: json['url'] ?? '',
+      imageUrl: json['urlToImage'] ?? '',
+      publishedAt: json['publishedAt'] ?? '',
+      source: json['source'] != null ? json['source']['name'] ?? 'Không rõ nguồn' : 'Không rõ nguồn',
+    );
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class NewsApiService {
+  final String apiKey = dotenv.env['NEWS_API_KEY'] ?? '';
+  final String baseUrl = 'https://newsapi.org/v2';
 
-  void _incrementCounter() {
+  Future<List<NewsArticle>> getWeatherNews() async {
+    // print('===== Begin getWeatherNews =====');
+    // print('API Key: ${apiKey.isNotEmpty ? apiKey.substring(0, 5) + "..." : "empty"}');
+    
+    try {
+      // Thử không có giới hạn ngôn ngữ
+      final url = '$baseUrl/everything?q=weather OR thời tiết&sortBy=publishedAt&apiKey=$apiKey';
+      // print('Request URL: $url');
+      
+      final response = await http.get(Uri.parse(url));
+      
+      // print('Response status: ${response.statusCode}');
+      if (response.body.isNotEmpty) {
+        // print('Response preview: ${response.body.substring(0, min(200, response.body.length))}...');
+      } else {
+        // print('Response body is empty');
+      }
+      
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        
+        if (jsonData.containsKey('articles')) {
+          final articlesList = jsonData['articles'] as List;
+          // print('Articles found: ${articlesList.length}');
+          
+          if (articlesList.isEmpty) {
+            // print('Article list is empty');
+            return [];
+          }
+          
+          final articles = articlesList
+              .map((article) => NewsArticle.fromJson(article))
+              .toList();
+          
+          // print('Parsed articles: ${articles.length}');
+          return articles;
+        } else {
+          // print('No "articles" key in response. Keys: ${jsonData.keys.toList()}');
+          return [];
+        }
+      } else {
+        // print('Error response: ${response.body}');
+        throw Exception('Không thể lấy tin tức thời tiết: ${response.statusCode}');
+      }
+    } catch (e) {
+      // print('Exception in getWeatherNews: $e');
+      // print('Stacktrace: $stacktrace');
+      rethrow;
+    } finally {
+      // print('===== End getWeatherNews =====');
+    }
+  }
+}
+
+class NewsScreen extends StatefulWidget {
+  const NewsScreen({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _NewsScreenState createState() => _NewsScreenState();
+}
+
+class _NewsScreenState extends State<NewsScreen> {
+  final NewsApiService _newsService = NewsApiService();
+  List<NewsArticle> _newsList = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNews();
+  }
+
+  Future<void> _loadNews() async {
+  setState(() {
+    _isLoading = true;
+    _errorMessage = null;
+  });
+
+  try {
+    // print('Calling NewsApiService.getWeatherNews()');
+    final news = await _newsService.getWeatherNews();
+    
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _newsList = news;
+      _isLoading = false;
+    });
+    
+    // print('News loaded: ${_newsList.length} articles');
+  } catch (e) {
+    // print('Error in _loadNews: $e');
+    setState(() {
+      _isLoading = false;
+      _errorMessage = e.toString();
     });
   }
+}
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text('Tin tức thời tiết'),
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _loadNews,
+          ),
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    
+    if (_errorMessage != null) {
+      return Center(
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red),
+            SizedBox(height: 16),
+            Text('Đã xảy ra lỗi: $_errorMessage', textAlign: TextAlign.center),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadNews,
+              child: Text('Thử lại'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_newsList.isEmpty) {
+      return Center(child: Text('Không có tin tức nào'));
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadNews,
+      child: ListView.builder(
+        itemCount: _newsList.length,
+        itemBuilder: (context, index) {
+          return NewsCard(article: _newsList[index]);
+        },
+      ),
+    );
+  }
+}
+
+class NewsCard extends StatelessWidget {
+  final NewsArticle article;
+
+  const NewsCard({super.key, required this.article});
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context, 
+            MaterialPageRoute(
+              builder: (context) => NewsDetailScreen(article: article)
+            )
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (article.imageUrl.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                child: CachedNetworkImage(
+                  imageUrl: article.imageUrl,
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    height: 180,
+                    color: Colors.grey[300],
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    height: 180,
+                    color: Colors.grey[300],
+                    child: Icon(Icons.image_not_supported, size: 40),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    article.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    article.description,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[700],
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        article.source,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        _formatDate(article.publishedAt),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final dateTime = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(dateTime);
+
+      if (difference.inDays == 0) {
+        return 'Hôm nay';
+      } else if (difference.inDays == 1) {
+        return 'Hôm qua';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays} ngày trước';
+      } else {
+        return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+      }
+    } catch (e) {
+      return dateString;
+    }
+  }
+}
+
+class NewsDetailScreen extends StatelessWidget {
+  final NewsArticle article;
+
+  const NewsDetailScreen({super.key, required this.article});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Chi tiết tin tức'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: () {
+              // Thêm chức năng chia sẻ ở đây nếu cần
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (article.imageUrl.isNotEmpty)
+              CachedNetworkImage(
+                imageUrl: article.imageUrl,
+                height: 250,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  height: 250,
+                  color: Colors.grey[300],
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  height: 250,
+                  color: Colors.grey[300],
+                  child: Icon(Icons.image_not_supported, size: 60),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          article.source,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        _formatDate(article.publishedAt),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    article.title,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    article.description,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      // ignore: deprecated_member_use
+                      if (await canLaunch(article.url)) {
+                        // ignore: deprecated_member_use
+                        await launch(article.url);
+                      }
+                    },
+                    icon: Icon(Icons.open_in_new),
+                    label: Text('Đọc bài viết đầy đủ'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final dateTime = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(dateTime);
+
+      if (difference.inDays == 0) {
+        return 'Hôm nay';
+      } else if (difference.inDays == 1) {
+        return 'Hôm qua';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays} ngày trước';
+      } else {
+        return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+      }
+    } catch (e) {
+      return dateString;
+    }
   }
 }
