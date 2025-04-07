@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'news/news_screen.dart';
+import 'package:weather_app/screens/news/news_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -28,9 +28,9 @@ class _MainScreenState extends State<MainScreen> {
   
   void _initPages() {
     _pages = [
-      _buildPlaceholderPage('Trang chủ'),
-      _buildPlaceholderPage('Bản đồ'),
       NewsScreen(),
+      _buildPlaceholderPage('Bản Đồ'),
+      _buildPlaceholderPage('Tìm Hiểu Thêm'),
       _buildPlaceholderPage('Cài Đặt'),
     ];
   }
@@ -71,35 +71,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
       drawer: _buildDrawer(),
       body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Trang Chủ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Bản Đồ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.info_outline),
-            label: 'Tìm Hiểu Thêm',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Cài Đặt',
-          ),
-        ],
-      ),
     );
   }
   
