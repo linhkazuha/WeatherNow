@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'detail_screen.dart';
 
 class NewsScreen extends StatefulWidget {
-  const NewsScreen({Key? key}) : super(key: key);
+  const NewsScreen({super.key});
 
   @override
   _NewsScreenState createState() => _NewsScreenState();
@@ -175,13 +175,13 @@ class WeatherNewsCard extends StatelessWidget {
   final VoidCallback onTap;
   
   const WeatherNewsCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.imageUrl,
     required this.description,
     required this.reference,
     required this.onTap,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {
@@ -192,7 +192,7 @@ class WeatherNewsCard extends StatelessWidget {
     if (description.isNotEmpty) {
       List<String> lines = description.split('.');
       if (lines.isNotEmpty) {
-        firstLine = lines[0] + '.';
+        firstLine = '${lines[0]}.';
       } else {
         firstLine = description;
       }

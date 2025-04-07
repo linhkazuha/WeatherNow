@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'main_screen.dart';
+import 'screens/main_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.light(
           primary: primaryColor,
           secondary: secondaryColor,
-          background: backgroundColor,
+          surface: backgroundColor,
         ),
       ),
       home: MainScreen(),

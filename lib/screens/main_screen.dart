@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/news/news_screen.dart';
+import 'news/news_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

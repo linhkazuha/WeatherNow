@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailScreen extends StatelessWidget {
   final String title;
@@ -7,12 +8,12 @@ class DetailScreen extends StatelessWidget {
   final String reference;
 
   const DetailScreen({
-    Key? key,
+    super.key,
     required this.title,
     required this.imageUrl,
     required this.description,
     required this.reference,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -142,12 +143,23 @@ class DetailScreen extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(height: 4),
-                              Text(
-                                reference,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: primaryColor,
-                                  fontStyle: FontStyle.italic,
+                              GestureDetector(
+                                onTap: () async {
+                                  if (reference.isNotEmpty) {
+                                    final Uri url = Uri.parse(reference);
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                    }
+                                  }
+                                },
+                                child: Text(
+                                  'Wikipedia',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w500,
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
                             ],
