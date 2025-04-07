@@ -28,9 +28,9 @@ class _MainScreenState extends State<MainScreen> {
   
   void _initPages() {
     _pages = [
-      NewsScreen(),
+      _buildPlaceholderPage('Trang chủ'),
       _buildPlaceholderPage('Bản Đồ'),
-      _buildPlaceholderPage('Tìm Hiểu Thêm'),
+      NewsScreen(),
       _buildPlaceholderPage('Cài Đặt'),
     ];
   }
