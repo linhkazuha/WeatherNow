@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/weather_models.dart';
 
 class WeatherService {
-  final String apiKey =
-      'dae0ffebd317a8939677a977f216af19'; // Replace with your OpenWeather API key
+  final String apiKey = dotenv.env['OpenWeather_API_key'] ?? '';
 
   // Cache for weather data
   final Map<String, WeatherPoint> _weatherCache = {};
