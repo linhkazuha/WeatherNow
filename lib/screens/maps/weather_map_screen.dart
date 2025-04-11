@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../models/weather_models.dart';
 import '../../../services/weather_service.dart';
+import 'widgets/weather_time_slider.dart';
+import 'widgets/weather_layer_dropdown.dart';
 
 class WeatherMapScreen extends StatefulWidget {
   const WeatherMapScreen({super.key});
@@ -26,6 +27,7 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
   LatLng? _userPosition;
   bool _isLoading = false;
   bool _isLocationPermissionChecked = false;
+  // ignore: unused_field
   bool _showLayerOptions = false;
 
   String _currentLayer = 'temp_new';
@@ -266,15 +268,11 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
     });
   }
 
-  String _getFormattedTime() {
-    return DateFormat('HH:mm - dd/MM/yyyy').format(_selectedTime);
-  }
-
-  void _toggleLayerOptions() {
-    setState(() {
-      _showLayerOptions = !_showLayerOptions;
-    });
-  }
+  // void _toggleLayerOptions() {
+  //   setState(() {
+  //     _showLayerOptions = !_showLayerOptions;
+  //   });
+  // }
 
   Color _getLayerLegendColor(MapLayer layer, double proportion) {
     final colorMap = layer.colorMap;
@@ -412,11 +410,11 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(50),
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
@@ -449,182 +447,141 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
   }
 
   Widget _buildLayerSelector() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Align(
-        alignment: Alignment.topRight,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: _toggleLayerOptions,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: _currentLayerData.color,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(_currentLayerData.name),
-                        const SizedBox(width: 8),
-                        Icon(
-                          _showLayerOptions
-                              ? Icons.arrow_drop_up
-                              : Icons.arrow_drop_down,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            if (_showLayerOptions)
-              Container(
-                margin: const EdgeInsets.only(top: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children:
-                      _availableLayers
-                          .map((layer) => _buildLayerOption(layer))
-                          .toList(),
-                ),
-              ),
-          ],
-        ),
-      ),
+    return WeatherLayerDropdown(
+      availableLayers: _availableLayers,
+      currentLayerId: _currentLayer,
+      isLoading: _isLoading,
+      onLayerSelected: (layerId) {
+        setState(() {
+          _currentLayer = layerId;
+          _showLayerOptions =
+              false; // Không cần thiết nữa nhưng giữ lại để tương thích
+        });
+      },
     );
   }
 
-  Widget _buildLayerOption(MapLayer layer) {
-    final isSelected = _currentLayer == layer.id;
-    Color backgroundColor = Colors.transparent;
+  // Widget _buildLayerOption(MapLayer layer) {
+  //   final isSelected = _currentLayer == layer.id;
+  //   Color backgroundColor = Colors.transparent;
 
-    if (isSelected) {
-      backgroundColor = Color.alphaBlend(
-        layer.color.withOpacity(0.2),
-        Colors.white,
-      );
-    }
+  //   if (isSelected) {
+  //     backgroundColor = Color.alphaBlend(
+  //       layer.color.withOpacity(0.2),
+  //       Colors.white,
+  //     );
+  //   }
 
-    return Material(
-      color: backgroundColor,
-      child: InkWell(
-        onTap:
-            _isLoading
-                ? null
-                : () {
-                  setState(() {
-                    _currentLayer = layer.id;
-                    _showLayerOptions = false;
-                  });
-                },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: layer.color,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(layer.name),
-              const SizedBox(width: 16),
-              if (isSelected) const Icon(Icons.check, size: 16),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  //   return Material(
+  //     color: backgroundColor,
+  //     child: InkWell(
+  //       onTap:
+  //           _isLoading
+  //               ? null
+  //               : () {
+  //                 setState(() {
+  //                   _currentLayer = layer.id;
+  //                   _showLayerOptions = false;
+  //                 });
+  //               },
+  //       child: Padding(
+  //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  //         child: Row(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             Container(
+  //               width: 12,
+  //               height: 12,
+  //               decoration: BoxDecoration(
+  //                 color: layer.color,
+  //                 shape: BoxShape.circle,
+  //               ),
+  //             ),
+  //             const SizedBox(width: 8),
+  //             Text(layer.name),
+  //             const SizedBox(width: 16),
+  //             if (isSelected) const Icon(Icons.check, size: 16),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildTimeSlider() {
     return Positioned(
-      bottom: 20,
-      left: 20,
-      right: 20,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Hiện tại'),
-                Text(_getFormattedTime()),
-                const Text('+5 ngày'),
-              ],
-            ),
-            const SizedBox(height: 8),
-            SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                activeTrackColor: Colors.amber,
-                inactiveTrackColor: Colors.grey.shade300,
-                thumbColor: Colors.amber,
-                overlayColor: const Color.fromRGBO(255, 193, 7, 0.2),
-              ),
-              child: Slider(
-                value: _timeSliderValue,
-                onChanged: _isLoading ? null : _updateTimeFromSlider,
-              ),
-            ),
-          ],
-        ),
+      bottom: 12,
+      left: 16,
+      right: 16,
+      child: WeatherTimeSlider(
+        initialTime: _selectedTime,
+        initialValue: _timeSliderValue,
+        isLoading: _isLoading,
+        onTimeChanged: _updateTimeFromSlider,
       ),
     );
   }
+  // Widget _buildTimeSlider() {
+  //   return Positioned(
+  //     bottom: 12,
+  //     left: 16,
+  //     right: 16,
+  //     child: Container(
+  //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(16),
+  //         boxShadow: const [
+  //           BoxShadow(
+  //             color: Colors.black26,
+  //             blurRadius: 4,
+  //             offset: Offset(0, 2),
+  //           ),
+  //         ],
+  //       ),
+  //       child: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           // Mốc đang chọn (to rõ)
+  //           Text(
+  //             _getFormattedTime(),
+  //             style: const TextStyle(
+  //               fontSize: 18,
+  //               fontWeight: FontWeight.bold,
+  //               color: Colors.black87,
+  //             ),
+  //           ),
+  //           const SizedBox(height: 4),
+
+  //           // Slider với tooltip khi kéo
+  //           SliderTheme(
+  //             data: SliderTheme.of(context).copyWith(
+  //               activeTrackColor: Colors.amber,
+  //               inactiveTrackColor: Colors.grey.shade300,
+  //               thumbColor: Colors.amber,
+  //               overlayColor: const Color.fromRGBO(255, 193, 7, 0.2),
+  //               trackHeight: 2,
+  //               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+  //               valueIndicatorColor: Colors.amber, // Tooltip màu vàng
+  //               showValueIndicator: ShowValueIndicator.always,
+  //               valueIndicatorTextStyle: const TextStyle(
+  //                 color: Colors.black,
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //             ),
+  //             child: Slider(
+  //               min: 0,
+  //               max: 5,
+  //               value: _timeSliderValue,
+  //               label: _getFormattedTime(), // Tooltip hiển thị thời gian
+  //               onChanged: _isLoading ? null : _updateTimeFromSlider,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildInfoPanel() {
     if (_selectedPoint == null) return const SizedBox.shrink();
@@ -696,29 +653,29 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
 
   Widget _buildLegend() {
     return Positioned(
-      bottom: 100,
+      bottom: 180,
       left: 20,
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.6),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
+          // boxShadow: const [
+          //   BoxShadow(
+          //     color: Colors.black26,
+          //     blurRadius: 8,
+          //     offset: Offset(0, 2),
+          //   ),
+          // ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Chú giải: ${_currentLayerData.name}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            ),
+            // Text(
+            //   'Chú giải: ${_currentLayerData.name}',
+            //   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            // ),
             const SizedBox(height: 4),
             Container(
               width: 150,
@@ -735,18 +692,21 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
               ),
             ),
             const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _getLegendMinValue(_currentLayerData),
-                  style: const TextStyle(fontSize: 10),
-                ),
-                Text(
-                  _getLegendMaxValue(_currentLayerData),
-                  style: const TextStyle(fontSize: 10),
-                ),
-              ],
+            SizedBox(
+              width: 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _getLegendMinValue(_currentLayerData),
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                  Text(
+                    _getLegendMaxValue(_currentLayerData),
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -811,7 +771,7 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
 
   Widget _buildLocationButton() {
     return Positioned(
-      bottom: 110,
+      bottom: 180,
       right: 20,
       child: Container(
         decoration: const BoxDecoration(
