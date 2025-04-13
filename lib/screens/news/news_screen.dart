@@ -12,14 +12,30 @@ class NewsScreen extends StatefulWidget {
 
 class _NewsScreenState extends State<NewsScreen> {
   late final FirebaseFirestore _firestore;
-  final List<String> _categories = ['Khí hậu', 'Hiện tượng', 'Thiên tai', 'Dự báo', 'Khác'];
-  String _selectedCategory = 'Hiện tượng';
+  final List<String> _categories = [
+    'Tất cả',
+    'Khí hậu',
+    'Hiện tượng',
+    'Thiên tai',
+    'Dự báo',
+    'Khác',
+  ];
+  String _selectedCategory = 'Tất cả';
   bool _isFirebaseInitialized = false;
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _initializeFirebase();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeFirebase() async {
@@ -34,12 +50,111 @@ class _NewsScreenState extends State<NewsScreen> {
     }
   }
 
+  void _startSearch() {
+    setState(() {
+      _isSearching = true;
+    });
+    // Cập nhật tiêu đề của AppBar trong MainScreen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Scaffold.of(
+        context,
+      ).context.findAncestorStateOfType<ScaffoldState>()?.setState(() {});
+    });
+  }
+
+  void _stopSearch() {
+    setState(() {
+      _isSearching = false;
+      _searchQuery = '';
+      _searchController.clear();
+    });
+  }
+
+  void _handleSearch(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
-    
+
+    // Cập nhật tiêu đề và actions của AppBar chính nếu cần
+    if (_isSearching) {
+      // Thêm tính năng tìm kiếm vào AppBar chính (được thêm sau từ MainScreen)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final scaffold = Scaffold.of(context);
+        if (scaffold.hasAppBar) {
+          final appBarWidget = AppBar(
+            title: TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm hiện tượng thời tiết...',
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: Colors.white70),
+              ),
+              style: TextStyle(color: Colors.white),
+              onChanged: _handleSearch,
+            ),
+            actions: [
+              IconButton(icon: Icon(Icons.close), onPressed: _stopSearch),
+            ],
+          );
+          // Cố gắng cập nhật AppBar
+          try {
+            scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(
+              () {},
+            );
+          } catch (e) {
+            print("Không thể cập nhật AppBar: $e");
+          }
+        }
+      });
+    }
+
     return Column(
       children: [
+        // Thêm widget chọn giữa hiển thị bình thường hoặc tìm kiếm
+        if (!_isSearching)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, right: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.search, color: primaryColor),
+                  onPressed: _startSearch,
+                ),
+              ],
+            ),
+          ),
+
+        if (_isSearching)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm hiện tượng thời tiết...',
+                prefixIcon: Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: _stopSearch,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onChanged: _handleSearch,
+            ),
+          ),
+
         // Category chips
         Container(
           color: Colors.white,
@@ -47,110 +162,166 @@ class _NewsScreenState extends State<NewsScreen> {
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Row(
-              children: _categories.map((category) {
-                final isSelected = _selectedCategory == category;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: ChoiceChip(
-                    label: Text(category),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() {
-                          _selectedCategory = category;
-                        });
-                      }
-                    },
-                    backgroundColor: Colors.grey[100],
-                    selectedColor: primaryColor,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.grey[800],
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        color: isSelected ? primaryColor : Colors.grey.withOpacity(0.2),
-                        width: 1,
+              children:
+                  _categories.map((category) {
+                    final isSelected = _selectedCategory == category;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: ChoiceChip(
+                        label: Text(category),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              _selectedCategory = category;
+                            });
+                          }
+                        },
+                        backgroundColor: Colors.grey[100],
+                        selectedColor: primaryColor,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : Colors.grey[800],
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color:
+                                isSelected
+                                    ? primaryColor
+                                    : Colors.grey.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
             ),
           ),
         ),
-        
+
         // News list
         Expanded(
-          child: !_isFirebaseInitialized
-              ? Center(child: CircularProgressIndicator())
-              : StreamBuilder<QuerySnapshot>(
-                  stream: _firestore
-                      .collection('knowledge')
-                      .where('type', isEqualTo: _getCategoryType(_selectedCategory))
-                      .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              }
-              
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text('Đã xảy ra lỗi: ${snapshot.error}'),
-                );
-              }
-              
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(
-                  child: Text('Không có dữ liệu hiện tượng thời tiết'),
-                );
-              }
-              
-              try {
-                return ListView.builder(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    final doc = snapshot.data!.docs[index];
-                    final data = doc.data() as Map<String, dynamic>;
-                    
-                    return WeatherNewsCard(
-                      title: data['name'] ?? '',
-                      imageUrl: data['image_link'] ?? '',
-                      description: data['content'] ?? '',
-                      reference: data['reference'] ?? '',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetailScreen(
+          child:
+              !_isFirebaseInitialized
+                  ? Center(child: CircularProgressIndicator())
+                  : StreamBuilder<QuerySnapshot>(
+                    stream:
+                        _selectedCategory == 'Tất cả'
+                            ? _firestore.collection('knowledge').snapshots()
+                            : _firestore
+                                .collection('knowledge')
+                                .where(
+                                  'type',
+                                  isEqualTo: _getCategoryType(
+                                    _selectedCategory,
+                                  ),
+                                )
+                                .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Đã xảy ra lỗi: ${snapshot.error}'),
+                        );
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return Center(
+                          child: Text('Không có dữ liệu hiện tượng thời tiết'),
+                        );
+                      }
+
+                      try {
+                        var docs = snapshot.data!.docs;
+
+                        // Lọc theo từ khóa tìm kiếm nếu có - chỉ tìm theo name
+                        if (_searchQuery.isNotEmpty) {
+                          docs =
+                              docs.where((doc) {
+                                final data = doc.data() as Map<String, dynamic>;
+                                final name =
+                                    (data['name'] ?? '')
+                                        .toString()
+                                        .toLowerCase();
+                                final query = _searchQuery.toLowerCase();
+                                return name.contains(query);
+                              }).toList();
+
+                          if (docs.isEmpty) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.search_off,
+                                    size: 64,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'Không tìm thấy kết quả cho "$_searchQuery"',
+                                    style: TextStyle(color: Colors.grey[600]),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        }
+
+                        return ListView.builder(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          itemCount: docs.length,
+                          itemBuilder: (context, index) {
+                            final doc = docs[index];
+                            final data = doc.data() as Map<String, dynamic>;
+
+                            return WeatherNewsCard(
                               title: data['name'] ?? '',
                               imageUrl: data['image_link'] ?? '',
                               description: data['content'] ?? '',
                               reference: data['reference'] ?? '',
-                            ),
-                          ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => DetailScreen(
+                                          title: data['name'] ?? '',
+                                          imageUrl: data['image_link'] ?? '',
+                                          description: data['content'] ?? '',
+                                          reference: data['reference'] ?? '',
+                                        ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         );
-                      },
-                    );
-                  },
-                );
-              } catch (e) {
-                return Center(
-                  child: Text('Lỗi khi hiển thị dữ liệu: $e'),
-                );
-              }
-            },
-          ),
+                      } catch (e) {
+                        return Center(
+                          child: Text('Lỗi khi hiển thị dữ liệu: $e'),
+                        );
+                      }
+                    },
+                  ),
         ),
       ],
     );
   }
-  
+
   String _getCategoryType(String category) {
     switch (category) {
+      case 'Tất cả':
+        return 'Tất cả'; // Trả về tất cả, nhưng không dùng trong truy vấn
       case 'Khí hậu':
         return 'Khí hậu';
       case 'Hiện tượng':
@@ -162,7 +333,7 @@ class _NewsScreenState extends State<NewsScreen> {
       case 'Khác':
         return 'Khác';
       default:
-        return 'Hiện tượng';
+        return 'Tất cả';
     }
   }
 }
@@ -173,7 +344,7 @@ class WeatherNewsCard extends StatelessWidget {
   final String description;
   final String reference;
   final VoidCallback onTap;
-  
+
   const WeatherNewsCard({
     super.key,
     required this.title,
@@ -182,11 +353,11 @@ class WeatherNewsCard extends StatelessWidget {
     required this.reference,
     required this.onTap,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
-    
+
     // Lấy dòng đầu tiên của mô tả
     String firstLine = '';
     if (description.isNotEmpty) {
@@ -202,9 +373,7 @@ class WeatherNewsCard extends StatelessWidget {
       onTap: onTap,
       child: Card(
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 3,
         shadowColor: primaryColor.withOpacity(0.2),
         child: Column(
@@ -215,27 +384,36 @@ class WeatherNewsCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  child: imageUrl.isNotEmpty
-                      ? Image.network(
-                          imageUrl,
-                          height: 160,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 160,
-                              width: double.infinity,
-                              color: Colors.grey[300],
-                              child: Icon(Icons.image_not_supported, size: 50, color: Colors.grey[500]),
-                            );
-                          },
-                        )
-                      : Container(
-                          height: 160,
-                          width: double.infinity,
-                          color: Colors.grey[300],
-                          child: Icon(Icons.image, size: 50, color: Colors.grey[500]),
-                        ),
+                  child:
+                      imageUrl.isNotEmpty
+                          ? Image.network(
+                            imageUrl,
+                            height: 160,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 160,
+                                width: double.infinity,
+                                color: Colors.grey[300],
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 50,
+                                  color: Colors.grey[500],
+                                ),
+                              );
+                            },
+                          )
+                          : Container(
+                            height: 160,
+                            width: double.infinity,
+                            color: Colors.grey[300],
+                            child: Icon(
+                              Icons.image,
+                              size: 50,
+                              color: Colors.grey[500],
+                            ),
+                          ),
                 ),
                 Positioned(
                   top: 10,
@@ -249,11 +427,7 @@ class WeatherNewsCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: Colors.white,
-                          size: 14,
-                        ),
+                        Icon(Icons.info_outline, color: Colors.white, size: 14),
                         SizedBox(width: 4),
                         Text(
                           'Chi tiết',
@@ -266,10 +440,10 @@ class WeatherNewsCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                )
+                ),
               ],
             ),
-            
+
             // Content
             Padding(
               padding: const EdgeInsets.all(16),

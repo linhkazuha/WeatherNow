@@ -17,7 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<String> _titles = [
     'Trang Chủ',
     'Bản Đồ',
-    'Tìm Hiểu Thêm',
+    'Bạn có biết',
     'Cài Đặt',
   ];
 
@@ -69,136 +69,222 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildDrawer() {
-    final primaryColor = Theme.of(context).primaryColor;
-
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [primaryColor, Color(0xFF90CAF9)],
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 32,
-                  child: Icon(Icons.cloud, size: 36, color: primaryColor),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  'Ứng Dụng Thời Tiết',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'Thông tin & Dự báo',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF4A6EA9), Color(0xFF6F96CF)],
           ),
-          _buildDrawerItem(0, 'Trang Chủ', Icons.home),
-          _buildDrawerItem(1, 'Bản Đồ', Icons.map),
-          _buildDrawerItem(2, 'Tìm Hiểu Thêm', Icons.info_outline),
-          Divider(color: Colors.grey.withOpacity(0.3), thickness: 1),
-          _buildDrawerItem(3, 'Cài Đặt', Icons.settings),
-          ListTile(
-            leading: Icon(Icons.help_outline, color: Colors.grey[700]),
-            title: Text(
-              'Thông Tin Ứng Dụng',
-              style: TextStyle(color: Colors.grey[800], fontSize: 15),
-            ),
-            onTap: () {
-              Navigator.pop(context);
-              _showAboutDialog();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawerItem(int index, String title, IconData icon) {
-    final primaryColor = Theme.of(context).primaryColor;
-    final isSelected = _selectedIndex == index;
-
-    return ListTile(
-      leading: Icon(icon, color: isSelected ? primaryColor : Colors.grey[700]),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isSelected ? primaryColor : Colors.grey[800],
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          fontSize: 15,
         ),
-      ),
-      selected: isSelected,
-      selectedTileColor: primaryColor.withOpacity(0.1),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-        Navigator.pop(context);
-      },
-    );
-  }
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top section with app logo and settings
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.home, color: Colors.white, size: 28),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        setState(() {
+                          _selectedIndex = 0; // Trang chủ
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.settings, color: Colors.white, size: 28),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        setState(() {
+                          _selectedIndex = 3; // Cài đặt
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
 
-  void _showAboutDialog() {
-    final primaryColor = Theme.of(context).primaryColor;
+              // App logo and name
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.wb_sunny,
+                              color: Colors.orange,
+                              size: 24,
+                            ),
+                            Icon(
+                              Icons.cloud,
+                              color: Colors.lightBlue,
+                              size: 32,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'WeatherNow',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Row(
-              children: [
-                Icon(Icons.info_outline, color: primaryColor),
-                SizedBox(width: 8),
-                Text('Thông Tin Ứng Dụng'),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Ứng Dụng Thời Tiết',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor,
+              SizedBox(height: 30),
+
+              // Search bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: TextField(
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Tìm vị trí',
+                      hintStyle: TextStyle(color: Colors.white70),
+                      prefixIcon: Icon(Icons.search, color: Colors.white),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    ),
                   ),
                 ),
-                SizedBox(height: 8),
-                Text('Phiên bản 1.0.0'),
-                SizedBox(height: 12),
-                Text('Cung cấp thông tin thời tiết và tin tức cập nhật nhất.'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('Đóng', style: TextStyle(color: primaryColor)),
+              ),
+
+              SizedBox(height: 20),
+
+              // Weather location cards
+              _buildWeatherCard('Yên Lạc', '31', 'Chủ yếu có mây', '31° / 23°'),
+              _buildWeatherCard('Hà Nội', '29', 'Chủ yếu có mây', '31° / 23°'),
+
+              Spacer(),
+
+              // "Did you know" button
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Center(
+                  child: ElevatedButton.icon(
+                    icon: Icon(Icons.lightbulb_outline, color: Colors.black54),
+                    label: Text(
+                      'Bạn có biết ?',
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                    onPressed: () {
+                      // Show interesting weather fact
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedIndex = 2; // Tìm hiểu thêm
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black54,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeatherCard(
+    String location,
+    String temperature,
+    String condition,
+    String range,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+      child: Card(
+        color: Colors.white12,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    location,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    condition,
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    range,
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    temperature,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 42,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    '°',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 42,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
