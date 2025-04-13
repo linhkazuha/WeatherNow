@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_app/screens/home_screen.dart';
 import 'package:weather_app/screens/news/news_screen.dart';
 import 'package:weather_app/screens/maps/weather_map_screen.dart';
 
@@ -29,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _initPages() {
     _pages = [
-      _buildPlaceholderPage('Trang chủ'),
+      HomeScreen(),
       WeatherMapScreen(),
       NewsScreen(),
       _buildPlaceholderPage('Cài Đặt'),

@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập vị trí của bạn để hiển thị dữ liệu thời tiết chính xác tại nơi bạn đang ở.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập vị trí của bạn để cập nhật dữ liệu thời tiết khi ứng dụng đang hoạt động và ở chế độ nền.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập vị trí của bạn để cập nhật dữ liệu thời tiết khi ứng dụng đang ở chế độ nền.</string>
 </dict>
 </plist>
