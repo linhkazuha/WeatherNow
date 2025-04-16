@@ -91,7 +91,7 @@ class _NewsScreenState extends State<NewsScreen> {
               controller: _searchController,
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'Tìm kiếm hiện tượng thời tiết...',
+                hintText: 'Bạn đang tìm gì?',
                 border: InputBorder.none,
                 hintStyle: TextStyle(color: Colors.white70),
               ),
@@ -118,16 +118,34 @@ class _NewsScreenState extends State<NewsScreen> {
       children: [
         // Thêm widget chọn giữa hiển thị bình thường hoặc tìm kiếm
         if (!_isSearching)
+          // Thay thế phần hiện tại có icon tìm kiếm với một TextField đầy đủ
           Padding(
-            padding: const EdgeInsets.only(top: 8, right: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.search, color: primaryColor),
-                  onPressed: _startSearch,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 5,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Tìm kiếm hiện tượng thời tiết...',
+                  hintStyle: TextStyle(
+                    color: Colors.grey[350],
+                    // fontStyle: FontStyle.italic, // Tùy chọn: làm cho nó in nghiêng
+                  ),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+                  // suffixIcon: Icon(Icons.mic, color: Colors.grey[600]),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 12),
                 ),
-              ],
+              ),
             ),
           ),
 
@@ -414,32 +432,6 @@ class WeatherNewsCard extends StatelessWidget {
                               color: Colors.grey[500],
                             ),
                           ),
-                ),
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.info_outline, color: Colors.white, size: 14),
-                        SizedBox(width: 4),
-                        Text(
-                          'Chi tiết',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               ],
             ),
