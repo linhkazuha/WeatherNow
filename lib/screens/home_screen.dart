@@ -201,13 +201,16 @@ class DailyForecast {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  final Function(String)? onLocationChanged;
+  
+  const HomeScreen({Key? key, this.onLocationChanged}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+// Đổi từ _HomeScreenState thành HomeScreenState để public
+class HomeScreenState extends State<HomeScreen> {
   final String apiKey = '5c2992addc713b68f4ae73b75db853e4';
   bool isLoading = true;
   WeatherData? weatherData;
@@ -256,8 +259,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // Chuyển từ private (có dấu gạch dưới) thành public để có thể gọi từ bên ngoài
+  void searchCity(String cityName) {
+    if (cityName.isEmpty) return;
+    _getWeatherByCity(cityName);
+  }
+
   Future<void> _getWeatherByCity(String cityName) async {
     try {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+      
       final currentWeatherUrl = 'https://api.openweathermap.org/data/2.5/weather?q=$cityName&units=metric&lang=vi&appid=$apiKey';
       final currentResponse = await http.get(Uri.parse(currentWeatherUrl));
       
@@ -282,15 +296,26 @@ class _HomeScreenState extends State<HomeScreen> {
             airQuality = AirQuality.fromJson(airQualityData);
           }
           
+          // Sử dụng tên thành phố từ API nếu có
+          String displayName = cityName;
+          if (currentData['name'] != null && currentData['name'].toString().isNotEmpty) {
+            displayName = currentData['name'];
+          }
+          
           setState(() {
             weatherData = WeatherData.fromJson(
               currentData, 
               forecastData['list'], 
-              cityName,
+              displayName,
               airQuality: airQuality
             );
             isLoading = false;
           });
+          
+          // Thông báo tên địa điểm mới
+          if (widget.onLocationChanged != null) {
+            widget.onLocationChanged!(displayName);
+          }
         } else {
           throw Exception('Không thể lấy dữ liệu dự báo');
         }
@@ -308,27 +333,35 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _getWeatherData(double lat, double lon) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
-      String cityName = placemarks.first.locality ?? placemarks.first.administrativeArea ?? 'Unknown';
-      
+      String cityName = placemarks.first.locality ?? 
+                      placemarks.first.administrativeArea ?? 
+                      placemarks.first.subAdministrativeArea ??
+                      'Unknown';
+    
       final currentWeatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&units=metric&lang=vi&appid=$apiKey';
       final currentResponse = await http.get(Uri.parse(currentWeatherUrl));
-      
+    
       final forecastUrl = 'https://api.openweathermap.org/data/2.5/forecast?lat=$lat&lon=$lon&units=metric&lang=vi&appid=$apiKey';
       final forecastResponse = await http.get(Uri.parse(forecastUrl));
-      
+    
       final airQualityUrl = 'https://api.openweathermap.org/data/2.5/air_pollution?lat=$lat&lon=$lon&appid=$apiKey';
       final airQualityResponse = await http.get(Uri.parse(airQualityUrl));
-      
+    
       if (currentResponse.statusCode == 200 && forecastResponse.statusCode == 200) {
         final currentData = json.decode(currentResponse.body);
         final forecastData = json.decode(forecastResponse.body);
-        
+      
+        // Sử dụng tên thành phố từ API nếu có
+        if (currentData['name'] != null && currentData['name'].toString().isNotEmpty) {
+          cityName = currentData['name'];
+        }
+      
         AirQuality? airQuality;
         if (airQualityResponse.statusCode == 200) {
           final airQualityData = json.decode(airQualityResponse.body);
           airQuality = AirQuality.fromJson(airQualityData);
         }
-        
+      
         setState(() {
           weatherData = WeatherData.fromJson(
             currentData, 
@@ -338,6 +371,11 @@ class _HomeScreenState extends State<HomeScreen> {
           );
           isLoading = false;
         });
+      
+        // Thông báo tên địa điểm mới
+        if (widget.onLocationChanged != null) {
+          widget.onLocationChanged!(cityName);
+        }
       } else {
         throw Exception('Lỗi API');
       }
@@ -347,17 +385,6 @@ class _HomeScreenState extends State<HomeScreen> {
         isLoading = false;
       });
     }
-  }
-
-  Future<void> _searchCity(String cityName) async {
-    if (cityName.isEmpty) return;
-    
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
-    
-    await _getWeatherByCity(cityName);
   }
 
   String _getWeatherIconUrl(String icon) {
@@ -424,7 +451,6 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _getCurrentLocation,
-                child: Text('Thử lại'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF64B5F6),
                   foregroundColor: Colors.white,
@@ -433,6 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
+                child: Text('Thử lại'),
               ),
             ],
           ),
@@ -447,38 +474,14 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Phần tìm kiếm
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                onSubmitted: _searchCity,
-                decoration: InputDecoration(
-                  hintText: 'Tìm kiếm thành phố...',
-                  prefixIcon: Icon(Icons.search),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 15),
-                ),
-              ),
-            ),
-          ),
 
           // Card thời tiết hiện tại
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
             child: Card(
               elevation: 4,
+              // ignore: deprecated_member_use
+              color: const Color(0xFF2B3866).withOpacity(0.8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -497,13 +500,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
+                                // color: Colors.white,
                               ),
                             ),
                             SizedBox(height: 4),
                             Text(
                               'Cập nhật lúc ${DateFormat('HH:mm').format(DateTime.now())}',
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: const Color.fromARGB(255, 202, 202, 202),
                                 fontSize: 14,
                               ),
                             ),
@@ -532,7 +536,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               '${weather.tempMin.round()}° / ${weather.tempMax.round()}°',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.grey[600],
+                                color: const Color.fromARGB(255, 202, 202, 202),
                               ),
                             ),
                           ],
@@ -623,6 +627,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
+                              // ignore: deprecated_member_use
                               color: weather.airQuality!.aqiColor.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: weather.airQuality!.aqiColor),
@@ -670,24 +675,26 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
+
           // Dự báo theo giờ
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Dự báo theo giờ',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                // Text(
+                //   'Dự báo theo giờ',
+                //   style: TextStyle(
+                //     fontSize: 18,
+                //     fontWeight: FontWeight.bold,
+                //     color: Colors.white, // Thêm màu trắng cho text
+                //   ),
+                // ),
                 SizedBox(height: 8),
-                Container(
+                SizedBox(
                   height: 120,
                   child: weather.hourlyForecast.isEmpty 
-                  ? Center(child: Text('Không có dữ liệu dự báo theo giờ'))
+                  ? Center(child: Text('Không có dữ liệu dự báo theo giờ', style: TextStyle(color: Colors.white)))
                   : ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: weather.hourlyForecast.length,
@@ -695,6 +702,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       final hourly = weather.hourlyForecast[index];
                       return Card(
                         margin: EdgeInsets.only(right: 8),
+                        // ignore: deprecated_member_use
+                        color: const Color(0xFF2B3866).withOpacity(0.6), // Thêm dòng này
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -706,7 +715,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Text(
                                 DateFormat('HH:mm').format(hourly.time),
-                                style: TextStyle(fontWeight: FontWeight.w500),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white, // Thêm màu trắng cho text
+                                ),
                               ),
                               Image.network(
                                 _getWeatherIconUrl(hourly.icon),
@@ -720,6 +732,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 '${hourly.temp.round()}°',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.white, // Thêm màu trắng cho text
                                 ),
                               ),
                             ],
@@ -739,22 +752,25 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Dự báo ${weather.dailyForecast.length} ngày',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                // Text(
+                //   'Dự báo ${weather.dailyForecast.length} ngày',
+                //   style: TextStyle(
+                //     fontSize: 18,
+                //     fontWeight: FontWeight.bold,
+                //     color: Colors.white, // Thêm màu trắng cho tiêu đề
+                //   ),
+                // ),
                 SizedBox(height: 8),
                 Card(
+                  // ignore: deprecated_member_use
+                  color: const Color(0xFF2B3866).withOpacity(0.6), // Thêm màu nền
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: weather.dailyForecast.isEmpty
-                    ? Center(child: Text('Không có dữ liệu dự báo theo ngày'))
+                    ? Center(child: Text('Không có dữ liệu dự báo theo ngày', style: TextStyle(color: Colors.white)))
                     : Column(
                       children: weather.dailyForecast.map((daily) {
                         return Padding(
@@ -766,7 +782,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 flex: 3,
                                 child: Text(
                                   _formatDayOfWeek(daily.date),
-                                  style: TextStyle(fontWeight: FontWeight.w500),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white, // Thêm màu trắng cho text
+                                  ),
                                 ),
                               ),
                               Expanded(
@@ -788,7 +807,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Text(
                                       '${daily.tempMin.round()}°',
                                       style: TextStyle(
-                                        color: Colors.blue[700],
+                                        color: Colors.lightBlue[300], // Màu nhạt hơn dễ thấy trên nền tối
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -796,7 +815,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Text(
                                       '${daily.tempMax.round()}°',
                                       style: TextStyle(
-                                        color: Colors.red[700],
+                                        color: Colors.red[300], // Màu nhạt hơn dễ thấy trên nền tối
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -813,6 +832,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+          
+
+
+
+
+
         ],
       ),
     );
@@ -833,7 +858,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[600],
+            color: const Color.fromARGB(255, 202, 202, 202),
             fontSize: 14,
           ),
         ),
@@ -854,7 +879,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[600],
+            color: const Color.fromARGB(255, 202, 202, 202),
             fontSize: 14,
           ),
         ),
