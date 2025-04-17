@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_app/providers/theme_provider.dart';
+import 'package:weather_app/screens/maps/widgets/mini_weather_map.dart';
 
 class AirQuality {
   final int aqi;
@@ -1053,6 +1054,9 @@ class HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
+              Padding(padding: const EdgeInsets.only(left: 8, bottom: 8)),
+              // Basic usage with auto location
+              MiniWeatherMapWidget(height: 180),
             ],
           ),
         );
