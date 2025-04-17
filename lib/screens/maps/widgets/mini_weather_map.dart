@@ -282,7 +282,7 @@ class MiniWeatherMapWidgetState extends State<MiniWeatherMapWidget> {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Text(
-                '© OpenStreetMap',
+                '© OpenWeather',
                 style: TextStyle(color: Colors.white70, fontSize: 8),
               ),
             ),
