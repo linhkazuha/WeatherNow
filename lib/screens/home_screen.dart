@@ -63,6 +63,9 @@ class WeatherData {
   final String icon;
   final int humidity;
   final double windSpeed;
+  final int pressure;
+  final int visibility;
+  final double feelsLike;
   final DateTime? sunrise;
   final DateTime? sunset;
   final List<HourlyForecast> hourlyForecast;
@@ -78,6 +81,9 @@ class WeatherData {
     required this.icon,
     required this.humidity,
     required this.windSpeed,
+    required this.pressure,
+    required this.visibility,
+    required this.feelsLike,
     this.sunrise,
     this.sunset,
     required this.hourlyForecast,
@@ -167,6 +173,9 @@ class WeatherData {
       icon: currentWeather['icon'],
       humidity: current['main']['humidity'],
       windSpeed: current['wind']['speed'].toDouble(),
+      pressure: current['main']['pressure'], // thêm
+      visibility: current['visibility'] ?? 0, // thêm
+      feelsLike: current['main']['feels_like'].toDouble(), // thêm
       sunrise: sunrise,
       sunset: sunset,
       hourlyForecast: hourlyList,
@@ -486,122 +495,312 @@ class HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Card thời tiết hiện tại
+
+// Card thời tiết hiện tại ==========================================
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
+  child: Card(
+    elevation: 0,
+    color: themeData['currentWeatherCardColor'],
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    weather.cityName,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: themeData['mainText'],
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Cập nhật lúc ${DateFormat('HH:mm').format(DateTime.now())}',
+                    style: TextStyle(
+                      color: themeData['auxiliaryText'],
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: Icon(Icons.refresh, color: themeData['mainText']),
+                onPressed: _getCurrentLocation,
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    '${weather.temp.round()}°',
+                    style: TextStyle(
+                      fontSize: 60,
+                      fontWeight: FontWeight.w500,
+                      color: themeData['mainText'],
+                    ),
+                  ),
+                  Text(
+                    '${weather.tempMin.round()}° / ${weather.tempMax.round()}°',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: themeData['auxiliaryText'],
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Image.network(
+                    _getWeatherIconUrl(weather.icon),
+                    width: 80,
+                    height: 80,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.cloud, size: 80, color: themeData['auxiliaryText']);
+                    },
+                  ),
+                  Text(
+                    weather.description,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: themeData['mainText'],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          
+          // Sửa lại Row này để thẳng hàng với nhiệt độ
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center, // Đảm bảo căn giữa
+            children: [
+              Icon(
+                Icons.thermostat,
+                color: themeData['auxiliaryText'],
+              ),
+              SizedBox(width: 8), // Thêm khoảng cách giữa icon và text
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${weather.feelsLike.round()}°',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: themeData['mainText'],
+                    ),
+                  ),
+                  Text(
+                    'Cảm giác thực',
+                    style: TextStyle(
+                      color: themeData['auxiliaryText'],
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  ),
+),
+
+
+
+              // Dự báo theo giờ =================================================
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 8),
+                    SizedBox(
+                      height: 120,
+                      child: weather.hourlyForecast.isEmpty 
+                      ? Center(child: Text('Không có dữ liệu dự báo theo giờ', style: TextStyle(color: themeData['mainText'])))
+                      : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: weather.hourlyForecast.length,
+                        itemBuilder: (context, index) {
+                          final hourly = weather.hourlyForecast[index];
+                          return Card(
+                            margin: EdgeInsets.only(right: 8),
+                            color: themeData['backCardColor'].withOpacity(0.7),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Container(
+                              width: 80,
+                              padding: EdgeInsets.all(8),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text(
+                                    DateFormat('HH:mm').format(hourly.time),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      color: themeData['mainText'],
+                                    ),
+                                  ),
+                                  Image.network(
+                                    _getWeatherIconUrl(hourly.icon),
+                                    width: 40,
+                                    height: 40,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(Icons.cloud, size: 40, color: themeData['auxiliaryText']);
+                                    },
+                                  ),
+                                  Text(
+                                    '${hourly.temp.round()}°',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: themeData['mainText'],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Dự báo 7 ngày ===================================================
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 8),
+                    Card(
+                      color: themeData['backCardColor'].withOpacity(0.7),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: weather.dailyForecast.isEmpty
+                        ? Center(child: Text('Không có dữ liệu dự báo theo ngày', style: TextStyle(color: themeData['mainText'])))
+                        : Column(
+                          children: weather.dailyForecast.map((daily) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      _formatDayOfWeek(daily.date),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: themeData['mainText'],
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Image.network(
+                                      _getWeatherIconUrl(daily.icon),
+                                      width: 40,
+                                      height: 40,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Icon(Icons.cloud, size: 40, color: themeData['auxiliaryText']);
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '${daily.tempMin.round()}°',
+                                          style: TextStyle(
+                                            color: themeData['mainText'], 
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          '${daily.tempMax.round()}°',
+                                          style: TextStyle(
+                                            color: themeData['mainText'],
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Card các chỉ số phụ =============================================
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
                 child: Card(
-                  elevation: 0,
-                  color: themeData['currentWeatherCardColor'],
+                  color: themeData['backCardColor'].withOpacity(0.7),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  weather.cityName,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: themeData['mainText'],
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Cập nhật lúc ${DateFormat('HH:mm').format(DateTime.now())}',
-                                  style: TextStyle(
-                                    color: themeData['auxiliaryText'],
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.refresh, color: themeData['mainText']),
-                              onPressed: _getCurrentLocation,
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20),
+                        // Text(
+                        //   'Thông số bổ sung',
+                        //   style: TextStyle(
+                        //     fontSize: 18,
+                        //     fontWeight: FontWeight.bold,
+                        //     color: themeData['mainText'],
+                        //   ),
+                        // ),
+                        // SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Column(
-                              children: [
-                                Text(
-                                  '${weather.temp.round()}°',
-                                  style: TextStyle(
-                                    fontSize: 60,
-                                    fontWeight: FontWeight.w500,
-                                    color: themeData['mainText'],
-                                  ),
-                                ),
-                                Text(
-                                  '${weather.tempMin.round()}° / ${weather.tempMax.round()}°',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: themeData['auxiliaryText'],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Image.network(
-                                  _getWeatherIconUrl(weather.icon),
-                                  width: 80,
-                                  height: 80,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(Icons.cloud, size: 80, color: themeData['auxiliaryText']);
-                                  },
-                                ),
-                                Text(
-                                  weather.description,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: themeData['mainText'],
-                                  ),
-                                ),
-                              ],
-                            ),
+                            // _buildWeatherDetail(Icons.wb_sunny, weather.uvIndex.toStringAsFixed(1), 'UV', themeData),
+                            _buildWeatherDetail(Icons.water_drop, '${weather.humidity}%', 'Độ ẩm', themeData),
+                            _buildWeatherDetail(Icons.air, '${weather.windSpeed} m/s', 'Gió', themeData),
                           ],
                         ),
-                        SizedBox(height: 20),
+                        SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildWeatherDetail(
-                              Icons.water_drop_outlined,
-                              '${weather.humidity}%',
-                              'Độ ẩm',
-                              themeData,
-                            ),
-                            _buildWeatherDetail(
-                              Icons.air,
-                              '${weather.windSpeed} m/s',
-                              'Gió',
-                              themeData,
-                            ),
-                            _buildWeatherDetail(
-                              Icons.wb_sunny_outlined,
-                              _formatTime(weather.sunrise),
-                              'B.Minh',
-                              themeData,
-                            ),
-                            _buildWeatherDetail(
-                              Icons.nightlight_outlined,
-                              _formatTime(weather.sunset),
-                              'H.Chiều',
-                              themeData,
-                            ),
+                            _buildWeatherDetail(Icons.speed, '${weather.pressure} hPa', 'Áp suất', themeData),
+                            _buildWeatherDetail(Icons.visibility, '${(weather.visibility / 1000).toStringAsFixed(1)} km', 'Tầm nhìn', themeData),
                           ],
                         ),
                       ],
@@ -610,10 +809,11 @@ class HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // Card chất lượng không khí
+
+              // Card chất lượng không khí =======================================
               if (weather.airQuality != null)
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
                   child: Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(
@@ -692,145 +892,6 @@ class HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-
-              // Dự báo theo giờ
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 8),
-                    SizedBox(
-                      height: 120,
-                      child: weather.hourlyForecast.isEmpty 
-                      ? Center(child: Text('Không có dữ liệu dự báo theo giờ', style: TextStyle(color: themeData['mainText'])))
-                      : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: weather.hourlyForecast.length,
-                        itemBuilder: (context, index) {
-                          final hourly = weather.hourlyForecast[index];
-                          return Card(
-                            margin: EdgeInsets.only(right: 8),
-                            color: themeData['backCardColor'].withOpacity(0.7),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Container(
-                              width: 80,
-                              padding: EdgeInsets.all(8),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text(
-                                    DateFormat('HH:mm').format(hourly.time),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: themeData['mainText'],
-                                    ),
-                                  ),
-                                  Image.network(
-                                    _getWeatherIconUrl(hourly.icon),
-                                    width: 40,
-                                    height: 40,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(Icons.cloud, size: 40, color: themeData['auxiliaryText']);
-                                    },
-                                  ),
-                                  Text(
-                                    '${hourly.temp.round()}°',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: themeData['mainText'],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Dự báo 7 ngày
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 8),
-                    Card(
-                      color: themeData['backCardColor'].withOpacity(0.7),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: weather.dailyForecast.isEmpty
-                        ? Center(child: Text('Không có dữ liệu dự báo theo ngày', style: TextStyle(color: themeData['mainText'])))
-                        : Column(
-                          children: weather.dailyForecast.map((daily) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      _formatDayOfWeek(daily.date),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        color: themeData['mainText'],
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Image.network(
-                                      _getWeatherIconUrl(daily.icon),
-                                      width: 40,
-                                      height: 40,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Icon(Icons.cloud, size: 40, color: themeData['auxiliaryText']);
-                                      },
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          '${daily.tempMin.round()}°',
-                                          style: TextStyle(
-                                            color: themeData['mainText'], 
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          '${daily.tempMax.round()}°',
-                                          style: TextStyle(
-                                            color: themeData['mainText'],
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         );
