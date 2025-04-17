@@ -1,7 +1,5 @@
-// lib/widgets/weather_layer_dropdown.dart
-
 import 'package:flutter/material.dart';
-import '../../../models/weather_models.dart';
+import '../../../../models/weather_models.dart';
 
 class WeatherLayerDropdown extends StatefulWidget {
   final List<MapLayer> availableLayers;
@@ -59,10 +57,14 @@ class _WeatherLayerDropdownState extends State<WeatherLayerDropdown> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Material(
@@ -77,10 +79,17 @@ class _WeatherLayerDropdownState extends State<WeatherLayerDropdown> {
               children: [
                 Icon(currentIcon, color: _currentLayerData.color, size: 20),
                 const SizedBox(width: 8),
-                Text(_currentLayerData.name),
+                Text(
+                  _currentLayerData.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
                 const SizedBox(width: 8),
                 Icon(
                   _showOptions ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                  color: Colors.black87,
                 ),
               ],
             ),
@@ -92,32 +101,29 @@ class _WeatherLayerDropdownState extends State<WeatherLayerDropdown> {
 
   IconData _getIconForLayer(String layerId) {
     switch (layerId) {
-      case 'rainfall':
+      case 'temp_new':
+        return Icons.thermostat_outlined;
+      case 'precipitation_new':
         return Icons.water_drop_outlined;
-      case 'wind':
+      case 'wind_new':
         return Icons.air;
-      case 'cloud':
+      case 'clouds_new':
         return Icons.cloud_outlined;
-      case 'pressure':
+      case 'pressure_new':
         return Icons.compress;
-      case 'humidity':
-        return Icons.waves;
-      case 'uv':
-        return Icons.wb_sunny_outlined;
-      case 'pm25':
-        return Icons.blur_on;
       default:
         return Icons.layers;
     }
   }
 
   String? _getAdditionalInfo(String layerId) {
-    switch (layerId) {
-      case 'wind':
-        return '2.7';
-      default:
-        return null;
-    }
+    // switch (layerId) {
+    //   case 'wind_new':
+    //     return '2.7';
+    //   default:
+    //     return null;
+    // }
+    return null;
   }
 
   Widget _buildOptionsPanel() {
@@ -125,10 +131,14 @@ class _WeatherLayerDropdownState extends State<WeatherLayerDropdown> {
       margin: const EdgeInsets.only(top: 4),
       width: 180,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
@@ -177,7 +187,7 @@ class _WeatherLayerDropdownState extends State<WeatherLayerDropdown> {
                 layer.name,
                 style: TextStyle(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? layer.color : Colors.black,
+                  color: isSelected ? layer.color : Colors.black87,
                 ),
               ),
               if (additionalInfo != null) ...[
