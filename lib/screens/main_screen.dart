@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/models/location_model.dart';
+import 'package:weather_app/providers/theme_provider.dart';
 import 'package:weather_app/screens/home_screen.dart';
 import 'package:weather_app/screens/news/news_screen.dart';
 import 'package:weather_app/screens/maps/weather_map_screen.dart';
 import 'package:weather_app/services/location_service.dart';
+import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -71,25 +73,30 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildPlaceholderPage(String title) {
-    final Color primaryColorWithOpacity = Color(0xFF64B5F6).withOpacity(0.5);
+    // Lấy màu từ theme thay vì sử dụng giá trị cố định
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final Color primaryColorWithOpacity = themeProvider.themeData['auxiliaryText'].withOpacity(0.5);
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.cloud_queue, size: 80, color: primaryColorWithOpacity),
-          SizedBox(height: 16),
-          Text(
-            'Trang $title\nĐang phát triển',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_queue, size: 80, color: primaryColorWithOpacity),
+              SizedBox(height: 16),
+              Text(
+                'Trang $title\nĐang phát triển',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: themeProvider.themeData['mainText'],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 
@@ -148,32 +155,42 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/images/weather_background.jpg'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(_titles[_selectedIndex]),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
-        drawer: _buildDrawer(),
-        body: _pages[_selectedIndex],
-      ),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final themeData = themeProvider.themeData;
+
+        return Container(
+          decoration: BoxDecoration(
+            gradient: themeData['generalBackgroundColor'],
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              title: Text(
+                _titles[_selectedIndex],
+                style: TextStyle(
+                  color: themeData['mainText'],
+                ),
+              ),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              iconTheme: IconThemeData(
+                color: themeData['mainText'],
+              ),
+            ),
+            drawer: _buildDrawer(themeData),
+            body: _pages[_selectedIndex],
+          ),
+        );
+      }
     );
   }
 
-  Widget _buildDrawer() {
+  Widget _buildDrawer(Map<String, dynamic> themeData) {
     return Drawer(
       child: Container(
         decoration: BoxDecoration(
-          // ignore: deprecated_member_use
-          color: const Color(0xFF3C587F).withOpacity(0.5), 
+          color: themeData['sideBarColor'].withOpacity(0.5),
         ),
 
         child: SafeArea(
@@ -187,7 +204,7 @@ class _MainScreenState extends State<MainScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.home, color: Colors.white, size: 28),
+                      icon: Icon(Icons.home, color: themeData['mainText'], size: 28),
                       onPressed: () {
                         Navigator.pop(context);
                         setState(() {
@@ -196,7 +213,7 @@ class _MainScreenState extends State<MainScreen> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.settings, color: Colors.white, size: 28),
+                      icon: Icon(Icons.settings, color: themeData['mainText'], size: 28),
                       onPressed: () {
                         Navigator.pop(context);
                         setState(() {
@@ -241,7 +258,7 @@ class _MainScreenState extends State<MainScreen> {
                     Text(
                       'WeatherNow',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: themeData['mainText'],
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -257,16 +274,16 @@ class _MainScreenState extends State<MainScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: themeData['searchFieldColor'],
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextField(
                     controller: _searchController,
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: themeData['mainText']),
                     decoration: InputDecoration(
                       hintText: 'Tìm vị trí',
-                      hintStyle: TextStyle(color: Colors.white70),
-                      prefixIcon: Icon(Icons.search, color: Colors.white),
+                      hintStyle: TextStyle(color: themeData['mainText'].withOpacity(0.7)),
+                      prefixIcon: Icon(Icons.search, color: themeData['mainText']),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -286,7 +303,7 @@ class _MainScreenState extends State<MainScreen> {
                 child: Text(
                   'Địa điểm đã lưu',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: themeData['mainText'],
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -300,7 +317,7 @@ class _MainScreenState extends State<MainScreen> {
                         ? Center(
                           child: Text(
                             'Chưa có địa điểm nào được lưu',
-                            style: TextStyle(color: Colors.white70),
+                            style: TextStyle(color: themeData['mainText'].withOpacity(0.7)),
                           ),
                         )
                         : ListView.builder(
@@ -308,7 +325,7 @@ class _MainScreenState extends State<MainScreen> {
                           padding: EdgeInsets.only(bottom: 20),
                           itemBuilder: (context, index) {
                             final location = _savedLocations[index];
-                            return _buildLocationCard(location);
+                            return _buildLocationCard(location, themeData);
                           },
                         ),
               ),
@@ -331,7 +348,7 @@ class _MainScreenState extends State<MainScreen> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: themeData['didyouknowButton'],
                       foregroundColor: Colors.black54,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -351,7 +368,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildLocationCard(SavedLocation location) {
+  Widget _buildLocationCard(SavedLocation location, Map<String, dynamic> themeData) {
     // Kiểm tra xem địa điểm này có đang hiển thị trên trang chủ không
     final bool isCurrentLocation = _currentLocation == location.name;
 
@@ -360,13 +377,13 @@ class _MainScreenState extends State<MainScreen> {
       child: Stack(
         children: [
           Card(
-            color: Color(0xFF2B4E7F),
+            color: themeData['cardLocationColor'],
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
               // Thêm border nếu đây là địa điểm đang hiển thị
               side:
                   isCurrentLocation
-                      ? BorderSide(color: Color(0xFF5E90CA), width: 2)
+                      ? BorderSide(color: themeData['cardLocationBorderColor'], width: 2)
                       : BorderSide.none,
             ),
             child: InkWell(
@@ -386,7 +403,7 @@ class _MainScreenState extends State<MainScreen> {
                           Text(
                             location.name,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: themeData['mainText'],
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -397,7 +414,7 @@ class _MainScreenState extends State<MainScreen> {
                             Text(
                               location.description,
                               style: TextStyle(
-                                color: Colors.white70,
+                                color: themeData['auxiliaryText'],
                                 fontSize: 14,
                               ),
                             ),
@@ -407,7 +424,7 @@ class _MainScreenState extends State<MainScreen> {
                             Text(
                               '${location.tempMin.round()}° / ${location.tempMax.round()}°',
                               style: TextStyle(
-                                color: Colors.white70,
+                                color: themeData['auxiliaryText'],
                                 fontSize: 14,
                               ),
                             ),
@@ -417,7 +434,7 @@ class _MainScreenState extends State<MainScreen> {
                             Text(
                               'Chưa có dữ liệu',
                               style: TextStyle(
-                                color: Colors.white70,
+                                color: themeData['auxiliaryText'],
                                 fontSize: 14,
                               ),
                             ),
@@ -429,7 +446,7 @@ class _MainScreenState extends State<MainScreen> {
                         ? Text(
                           '${location.temp.round()}°',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: themeData['mainText'],
                             fontSize: 42,
                             fontWeight: FontWeight.w500,
                           ),
@@ -437,7 +454,7 @@ class _MainScreenState extends State<MainScreen> {
                         : Text(
                           '--°',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: themeData['mainText'],
                             fontSize: 42,
                             fontWeight: FontWeight.w500,
                           ),
@@ -453,7 +470,7 @@ class _MainScreenState extends State<MainScreen> {
             top: 8,
             right: 8,
             child: PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: Colors.white, size: 20),
+              icon: Icon(Icons.more_vert, color: themeData['mainText'], size: 20),
               color: Colors.white,
               padding: EdgeInsets.zero,
               onSelected: (value) {

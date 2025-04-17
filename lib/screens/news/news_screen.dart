@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'package:weather_app/providers/theme_provider.dart';
 import 'detail_screen.dart';
 
 class NewsScreen extends StatefulWidget {
@@ -54,11 +56,17 @@ class _NewsScreenState extends State<NewsScreen> {
     setState(() {
       _isSearching = true;
     });
-    // Cập nhật tiêu đề của AppBar trong MainScreen
+    
+    // Cập nhật AppBar khi bắt đầu tìm kiếm
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Scaffold.of(
-        context,
-      ).context.findAncestorStateOfType<ScaffoldState>()?.setState(() {});
+      final scaffold = Scaffold.of(context);
+      if (scaffold.hasAppBar) {
+        try {
+          scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(() {});
+        } catch (e) {
+          print("Không thể cập nhật AppBar: $e");
+        }
+      }
     });
   }
 
@@ -67,6 +75,18 @@ class _NewsScreenState extends State<NewsScreen> {
       _isSearching = false;
       _searchQuery = '';
       _searchController.clear();
+    });
+    
+    // Cập nhật AppBar khi dừng tìm kiếm
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final scaffold = Scaffold.of(context);
+      if (scaffold.hasAppBar) {
+        try {
+          scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(() {});
+        } catch (e) {
+          print("Không thể cập nhật AppBar: $e");
+        }
+      }
     });
   }
 
@@ -78,261 +98,307 @@ class _NewsScreenState extends State<NewsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).primaryColor;
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final themeData = themeProvider.themeData;
 
-    // Cập nhật tiêu đề và actions của AppBar chính nếu cần
-    if (_isSearching) {
-      // Thêm tính năng tìm kiếm vào AppBar chính (được thêm sau từ MainScreen)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final scaffold = Scaffold.of(context);
-        if (scaffold.hasAppBar) {
-          final appBarWidget = AppBar(
-            title: TextField(
-              controller: _searchController,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'Bạn đang tìm gì?',
-                border: InputBorder.none,
-                hintStyle: TextStyle(color: Colors.white70),
-              ),
-              style: TextStyle(color: Colors.white),
-              onChanged: _handleSearch,
-            ),
-            actions: [
-              IconButton(icon: Icon(Icons.close), onPressed: _stopSearch),
-            ],
-          );
-          // Cố gắng cập nhật AppBar
-          try {
-            scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(
-              () {},
-            );
-          } catch (e) {
-            print("Không thể cập nhật AppBar: $e");
+        // Cập nhật tiêu đề và actions của AppBar chính
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final scaffold = Scaffold.of(context);
+          if (scaffold.hasAppBar) {
+            try {
+              // Thêm nút search vào AppBar
+              if (_isSearching) {
+                // Hiển thị SearchBar khi đang tìm kiếm
+                final appBarWidget = AppBar(
+                  title: TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: 'Tìm kiếm hiện tượng thời tiết...',
+                      border: InputBorder.none,
+                      hintStyle: TextStyle(color: themeData['mainText'].withOpacity(0.7)),
+                    ),
+                    style: TextStyle(color: themeData['mainText']),
+                    onChanged: _handleSearch,
+                  ),
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  actions: [
+                    IconButton(
+                      icon: Icon(Icons.close, color: themeData['mainText']),
+                      onPressed: _stopSearch
+                    ),
+                  ],
+                );
+              } else {
+                // Hiển thị icon search khi không tìm kiếm
+                final appBarWidget = AppBar(
+                  title: Text(
+                    'Bạn có biết',
+                    style: TextStyle(color: themeData['mainText']),
+                  ),
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  actions: [
+                    IconButton(
+                      icon: Icon(Icons.search, color: themeData['mainText']),
+                      onPressed: _startSearch,
+                    ),
+                  ],
+                );
+              }
+              
+              scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(() {});
+            } catch (e) {
+              print("Không thể cập nhật AppBar: $e");
+            }
           }
-        }
-      });
-    }
+        });
 
-    return Column(
-      children: [
-        // Thêm widget chọn giữa hiển thị bình thường hoặc tìm kiếm
-        if (!_isSearching)
-          // Thay thế phần hiện tại có icon tìm kiếm với một TextField đầy đủ
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 5,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Tìm kiếm hiện tượng thời tiết...',
-                  hintStyle: TextStyle(
-                    color: Colors.grey[350],
-                    // fontStyle: FontStyle.italic, // Tùy chọn: làm cho nó in nghiêng
-                  ),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-                  // suffixIcon: Icon(Icons.mic, color: Colors.grey[600]),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ),
-
-        if (_isSearching)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: TextField(
-              controller: _searchController,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'Tìm kiếm hiện tượng thời tiết...',
-                prefixIcon: Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: _stopSearch,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-              onChanged: _handleSearch,
-            ),
-          ),
-
-        // Category chips
-        Container(
-          color: Colors.white,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              children:
-                  _categories.map((category) {
-                    final isSelected = _selectedCategory == category;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: ChoiceChip(
-                        label: Text(category),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              _selectedCategory = category;
-                            });
-                          }
-                        },
-                        backgroundColor: Colors.grey[100],
-                        selectedColor: primaryColor,
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : Colors.grey[800],
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(
-                            color:
-                                isSelected
-                                    ? primaryColor
-                                    : Colors.grey.withOpacity(0.2),
-                            width: 1,
-                          ),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
+        return Column(
+          children: [
+            // Thêm widget chọn giữa hiển thị bình thường hoặc tìm kiếm
+            if (!_isSearching)
+              // Thay thế phần hiện tại có icon tìm kiếm với một TextField đầy đủ
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: themeData['searchFieldColor'],
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 5,
+                        offset: Offset(0, 2),
                       ),
-                    );
-                  }).toList(),
+                    ],
+                  ),
+                  child: TextField(
+                    onTap: _startSearch,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      hintText: 'Bạn đang tìm gì?',
+                      hintStyle: TextStyle(
+                        color: themeData['mainText'].withOpacity(0.5),
+                      ),
+                      prefixIcon: Icon(Icons.search, color: themeData['mainText'].withOpacity(0.6)),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ),
+
+            if (_isSearching)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Bạn đang tìm gì?',
+                    prefixIcon: Icon(Icons.search, color: themeData['mainText']),
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.close, color: themeData['mainText']),
+                      onPressed: _stopSearch,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide(color: themeData['separateLine']),
+                    ),
+                    filled: true,
+                    fillColor: themeData['searchFieldColor'],
+                  ),
+                  style: TextStyle(color: themeData['mainText']),
+                  onChanged: _handleSearch,
+                ),
+              ),
+            // Category chips
+            Container(
+              color: Colors.transparent,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children:
+                      _categories.map((category) {
+                        final isSelected = _selectedCategory == category;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: ChoiceChip(
+                            label: Text(category),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedCategory = category;
+                                });
+                              }
+                            },
+                            backgroundColor: themeData['typeColor'],
+                            selectedColor: themeData['auxiliaryText'],
+                            labelStyle: TextStyle(
+                              color: () {
+                                if (isSelected) {
+                                  final Color mainText = themeData['mainText'];
+                                  final double luminance = (0.299 * mainText.red + 0.587 * mainText.green + 0.114 * mainText.blue);
+                                  return luminance < 186 ? Color(0xFFEFF5F1) : Color(0xFF1E1F33);
+                                } else {
+                                  return themeData['mainText'];
+                                }
+                              }(),
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            ),
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(
+                                color:
+                                    isSelected
+                                        ? themeData['typeBorderColor']
+                                        : themeData['typeBorderColor'].withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                ),
+              ),
             ),
-          ),
-        ),
 
-        // News list
-        Expanded(
-          child:
-              !_isFirebaseInitialized
-                  ? Center(child: CircularProgressIndicator())
-                  : StreamBuilder<QuerySnapshot>(
-                    stream:
-                        _selectedCategory == 'Tất cả'
-                            ? _firestore.collection('knowledge').snapshots()
-                            : _firestore
-                                .collection('knowledge')
-                                .where(
-                                  'type',
-                                  isEqualTo: _getCategoryType(
-                                    _selectedCategory,
-                                  ),
-                                )
-                                .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
+            // News list
+            Expanded(
+              child:
+                  !_isFirebaseInitialized
+                      ? Center(child: CircularProgressIndicator(
+                          color: themeData['mainText'],
+                        ))
+                      : StreamBuilder<QuerySnapshot>(
+                        stream:
+                            _selectedCategory == 'Tất cả'
+                                ? _firestore.collection('knowledge').snapshots()
+                                : _firestore
+                                    .collection('knowledge')
+                                    .where(
+                                      'type',
+                                      isEqualTo: _getCategoryType(
+                                        _selectedCategory,
+                                      ),
+                                    )
+                                    .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator(
+                              color: themeData['mainText'],
+                            ));
+                          }
 
-                      if (snapshot.hasError) {
-                        return Center(
-                          child: Text('Đã xảy ra lỗi: ${snapshot.error}'),
-                        );
-                      }
-
-                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return Center(
-                          child: Text('Không có dữ liệu hiện tượng thời tiết'),
-                        );
-                      }
-
-                      try {
-                        var docs = snapshot.data!.docs;
-
-                        // Lọc theo từ khóa tìm kiếm nếu có - chỉ tìm theo name
-                        if (_searchQuery.isNotEmpty) {
-                          docs =
-                              docs.where((doc) {
-                                final data = doc.data() as Map<String, dynamic>;
-                                final name =
-                                    (data['name'] ?? '')
-                                        .toString()
-                                        .toLowerCase();
-                                final query = _searchQuery.toLowerCase();
-                                return name.contains(query);
-                              }).toList();
-
-                          if (docs.isEmpty) {
+                          if (snapshot.hasError) {
                             return Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.search_off,
-                                    size: 64,
-                                    color: Colors.grey,
-                                  ),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Không tìm thấy kết quả cho "$_searchQuery"',
-                                    style: TextStyle(color: Colors.grey[600]),
-                                  ),
-                                ],
+                              child: Text(
+                                'Đã xảy ra lỗi: ${snapshot.error}',
+                                style: TextStyle(color: themeData['mainText']),
                               ),
                             );
                           }
-                        }
 
-                        return ListView.builder(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          itemCount: docs.length,
-                          itemBuilder: (context, index) {
-                            final doc = docs[index];
-                            final data = doc.data() as Map<String, dynamic>;
+                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                            return Center(
+                              child: Text(
+                                'Không có dữ liệu hiện tượng thời tiết',
+                                style: TextStyle(color: themeData['mainText']),
+                              ),
+                            );
+                          }
 
-                            return WeatherNewsCard(
-                              title: data['name'] ?? '',
-                              imageUrl: data['image_link'] ?? '',
-                              description: data['content'] ?? '',
-                              reference: data['reference'] ?? '',
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => DetailScreen(
-                                          title: data['name'] ?? '',
-                                          imageUrl: data['image_link'] ?? '',
-                                          description: data['content'] ?? '',
-                                          reference: data['reference'] ?? '',
-                                        ),
+                          try {
+                            var docs = snapshot.data!.docs;
+
+                            // Lọc theo từ khóa tìm kiếm nếu có - chỉ tìm theo name
+                            if (_searchQuery.isNotEmpty) {
+                              docs =
+                                  docs.where((doc) {
+                                    final data = doc.data() as Map<String, dynamic>;
+                                    final name =
+                                        (data['name'] ?? '')
+                                            .toString()
+                                            .toLowerCase();
+                                    final query = _searchQuery.toLowerCase();
+                                    return name.contains(query);
+                                  }).toList();
+
+                              if (docs.isEmpty) {
+                                return Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.search_off,
+                                        size: 64,
+                                        color: themeData['auxiliaryText'],
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        'Không tìm thấy kết quả cho "$_searchQuery"',
+                                        style: TextStyle(color: themeData['mainText']),
+                                      ),
+                                    ],
                                   ),
+                                );
+                              }
+                            }
+
+                            return ListView.builder(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              itemCount: docs.length,
+                              itemBuilder: (context, index) {
+                                final doc = docs[index];
+                                final data = doc.data() as Map<String, dynamic>;
+
+                                return WeatherNewsCard(
+                                  title: data['name'] ?? '',
+                                  imageUrl: data['image_link'] ?? '',
+                                  description: data['content'] ?? '',
+                                  reference: data['reference'] ?? '',
+                                  themeData: themeData,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => DetailScreen(
+                                              title: data['name'] ?? '',
+                                              imageUrl: data['image_link'] ?? '',
+                                              description: data['content'] ?? '',
+                                              reference: data['reference'] ?? '',
+                                            ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             );
-                          },
-                        );
-                      } catch (e) {
-                        return Center(
-                          child: Text('Lỗi khi hiển thị dữ liệu: $e'),
-                        );
-                      }
-                    },
-                  ),
-        ),
-      ],
+                          } catch (e) {
+                            return Center(
+                              child: Text(
+                                'Lỗi khi hiển thị dữ liệu: $e',
+                                style: TextStyle(color: themeData['mainText']),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+            ),
+          ],
+        );
+      }
     );
   }
 
@@ -361,6 +427,7 @@ class WeatherNewsCard extends StatelessWidget {
   final String imageUrl;
   final String description;
   final String reference;
+  final Map<String, dynamic> themeData;
   final VoidCallback onTap;
 
   const WeatherNewsCard({
@@ -369,13 +436,12 @@ class WeatherNewsCard extends StatelessWidget {
     required this.imageUrl,
     required this.description,
     required this.reference,
+    required this.themeData,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).primaryColor;
-
     // Lấy dòng đầu tiên của mô tả
     String firstLine = '';
     if (description.isNotEmpty) {
@@ -393,7 +459,8 @@ class WeatherNewsCard extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 3,
-        shadowColor: primaryColor.withOpacity(0.2),
+        color: themeData['didyouknowCardColor'],
+        shadowColor: themeData['auxiliaryText'].withOpacity(0.2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -413,11 +480,11 @@ class WeatherNewsCard extends StatelessWidget {
                               return Container(
                                 height: 160,
                                 width: double.infinity,
-                                color: Colors.grey[300],
+                                color: themeData['cardLocationColor'],
                                 child: Icon(
                                   Icons.image_not_supported,
                                   size: 50,
-                                  color: Colors.grey[500],
+                                  color: themeData['mainText'].withOpacity(0.5),
                                 ),
                               );
                             },
@@ -425,11 +492,11 @@ class WeatherNewsCard extends StatelessWidget {
                           : Container(
                             height: 160,
                             width: double.infinity,
-                            color: Colors.grey[300],
+                            color: themeData['cardLocationColor'],
                             child: Icon(
                               Icons.image,
                               size: 50,
-                              color: Colors.grey[500],
+                              color: themeData['mainText'].withOpacity(0.5),
                             ),
                           ),
                 ),
@@ -447,7 +514,7 @@ class WeatherNewsCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      color: themeData['mainText'],
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -457,7 +524,7 @@ class WeatherNewsCard extends StatelessWidget {
                     firstLine,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: themeData['auxiliaryText'],
                       height: 1.3,
                     ),
                     maxLines: 1,
