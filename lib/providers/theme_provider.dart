@@ -61,29 +61,6 @@ final Map<String, dynamic> lightTheme = {
   "typeBorderColor": const Color(0x99000000),
   "didyouknowCardColor": const Color(0xFFE4F2FD),  
 
-  
-  // 'generalBackgroundColor': const LinearGradient(
-  //   colors: [Color(0xFF5498E1), Color(0xFF69A3D1)],
-  //   begin: Alignment.topCenter,
-  //   end: Alignment.bottomCenter,
-  // ),
-  // 'mainText': const Color(0xFFFEF8F8),
-  // 'auxiliaryText': const Color(0xFF92B8DC),
-  // 'currentWeatherCardColor': Colors.transparent,
-  // 'backCardColor': const Color(0xFF5490D6),
-  // 'separateLine': const Color(0xFF226287),
-  // 'sideBarColor': const Color(0xFF53B1F7),
-  // // ignore: deprecated_member_use
-  // 'searchFieldColor': const Color(0xFFFFFFFF).withOpacity(0.6),
-  // 'cardLocationColor': const Color(0xFF92E1FF),
-  // // ignore: deprecated_member_use
-  // 'cardLocationBorderColor': const Color(0xFF000000).withOpacity(0.6),
-  // // ignore: deprecated_member_use
-  // 'didyouknowButton': const Color(0xFFFFFFFF).withOpacity(0.8),
-  // 'didyouknowCardColor': const Color(0xFFE4F2FD),
-  // 'typeColor': const Color(0xFF92E1FF),
-  // // ignore: deprecated_member_use
-  // 'typeBorderColor': const Color(0xFF000000).withOpacity(0.6),
 };
 
 final Map<String, dynamic> darkTheme = {
@@ -98,11 +75,11 @@ final Map<String, dynamic> darkTheme = {
   "backCardColor": const Color(0xFF3C437A),
   "separateLine": const Color(0xFFBCC1E6),
   "sideBarColor": const Color(0xFF272C4C),
-  "searchFieldColor": const Color(0x99FFFFFF),
+  "searchFieldColor": const Color.fromARGB(153, 93, 99, 168),
   "cardLocationColor": const Color(0xFF3C437A),
   "cardLocationBorderColor": const Color(0x99FFFFFF),
   "didyouknowButton": const Color(0xCCFFFFFF),
   "typeColor": const Color(0xFF3C437A),
   "typeBorderColor": const Color(0x99FFFFFF),
-  "didyouknowCardColor": const Color(0xFFE4F2FD),
+  "didyouknowCardColor": const Color(0xFF2C2F50),
 };

@@ -559,15 +559,15 @@ class HomeScreenState extends State<HomeScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  weather.cityName,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: themeData['mainText'],
-                                  ),
-                                ),
-                                SizedBox(height: 4),
+                                // Text(
+                                //   weather.cityName,
+                                //   style: TextStyle(
+                                //     fontSize: 24,
+                                //     fontWeight: FontWeight.bold,
+                                //     color: themeData['mainText'],
+                                //   ),
+                                // ),
+                                // SizedBox(height: 4),
                                 Text(
                                   'Cập nhật lúc ${DateFormat('HH:mm').format(DateTime.now())}',
                                   style: TextStyle(
