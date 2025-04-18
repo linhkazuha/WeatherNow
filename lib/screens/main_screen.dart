@@ -76,7 +76,9 @@ class _MainScreenState extends State<MainScreen> {
     // Lấy màu từ theme thay vì sử dụng giá trị cố định
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        final Color primaryColorWithOpacity = themeProvider.themeData['auxiliaryText'].withOpacity(0.5);
+        final Color primaryColorWithOpacity = themeProvider
+            .themeData['auxiliaryText']
+            .withOpacity(0.5);
 
         return Center(
           child: Column(
@@ -96,7 +98,7 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
         );
-      }
+      },
     );
   }
 
@@ -168,21 +170,17 @@ class _MainScreenState extends State<MainScreen> {
             appBar: AppBar(
               title: Text(
                 _titles[_selectedIndex],
-                style: TextStyle(
-                  color: themeData['mainText'],
-                ),
+                style: TextStyle(color: themeData['mainText']),
               ),
               elevation: 0,
               backgroundColor: Colors.transparent,
-              iconTheme: IconThemeData(
-                color: themeData['mainText'],
-              ),
+              iconTheme: IconThemeData(color: themeData['mainText']),
             ),
             drawer: _buildDrawer(themeData),
             body: _pages[_selectedIndex],
           ),
         );
-      }
+      },
     );
   }
 
@@ -190,7 +188,7 @@ class _MainScreenState extends State<MainScreen> {
     return Drawer(
       child: Container(
         decoration: BoxDecoration(
-          color: themeData['sideBarColor'], //.withOpacity(0.5),
+          color: themeData['sideBarColor'].withOpacity(0.5),
         ),
 
         child: SafeArea(
@@ -204,7 +202,11 @@ class _MainScreenState extends State<MainScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.home, color: themeData['mainText'], size: 28),
+                      icon: Icon(
+                        Icons.home,
+                        color: themeData['mainText'],
+                        size: 28,
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                         setState(() {
@@ -213,7 +215,11 @@ class _MainScreenState extends State<MainScreen> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.settings, color: themeData['mainText'], size: 28),
+                      icon: Icon(
+                        Icons.settings,
+                        color: themeData['mainText'],
+                        size: 28,
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                         setState(() {
@@ -282,8 +288,13 @@ class _MainScreenState extends State<MainScreen> {
                     style: TextStyle(color: themeData['mainText']),
                     decoration: InputDecoration(
                       hintText: 'Tìm vị trí',
-                      hintStyle: TextStyle(color: themeData['mainText'].withOpacity(0.7)),
-                      prefixIcon: Icon(Icons.search, color: themeData['mainText']),
+                      hintStyle: TextStyle(
+                        color: themeData['mainText'].withOpacity(0.7),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: themeData['mainText'],
+                      ),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -317,7 +328,9 @@ class _MainScreenState extends State<MainScreen> {
                         ? Center(
                           child: Text(
                             'Chưa có địa điểm nào được lưu',
-                            style: TextStyle(color: themeData['mainText'].withOpacity(0.7)),
+                            style: TextStyle(
+                              color: themeData['mainText'].withOpacity(0.7),
+                            ),
                           ),
                         )
                         : ListView.builder(
@@ -368,7 +381,10 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildLocationCard(SavedLocation location, Map<String, dynamic> themeData) {
+  Widget _buildLocationCard(
+    SavedLocation location,
+    Map<String, dynamic> themeData,
+  ) {
     // Kiểm tra xem địa điểm này có đang hiển thị trên trang chủ không
     final bool isCurrentLocation = _currentLocation == location.name;
 
@@ -383,7 +399,10 @@ class _MainScreenState extends State<MainScreen> {
               // Thêm border nếu đây là địa điểm đang hiển thị
               side:
                   isCurrentLocation
-                      ? BorderSide(color: themeData['cardLocationBorderColor'], width: 2)
+                      ? BorderSide(
+                        color: themeData['cardLocationBorderColor'],
+                        width: 2,
+                      )
                       : BorderSide.none,
             ),
             child: InkWell(
@@ -470,7 +489,11 @@ class _MainScreenState extends State<MainScreen> {
             top: 8,
             right: 8,
             child: PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: themeData['mainText'], size: 20),
+              icon: Icon(
+                Icons.more_vert,
+                color: themeData['mainText'],
+                size: 20,
+              ),
               color: Colors.white,
               padding: EdgeInsets.zero,
               onSelected: (value) {

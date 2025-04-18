@@ -429,7 +429,19 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
               children: [
                 _buildSearchBar(),
                 const SizedBox(height: 10),
-                _buildLayerSelector(),
+                // Đặt nút home và bộ chọn lớp trong một Row
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    children: [
+                      // Nút home bên trái
+                      Container(child: _buildHomeButton()),
+                      const SizedBox(width: 10), // Khoảng cách giữa hai phần tử
+                      // Bộ chọn lớp chiếm phần còn lại của hàng
+                      Expanded(child: _buildLayerSelector()),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -506,6 +518,29 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
           },
           enabled: !_isLoading,
         ),
+      ),
+    );
+  }
+
+  // ignore: unused_element
+  Widget _buildHomeButton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.home, color: Colors.black87),
+        onPressed: () {
+          Navigator.of(context).pop(); // Điều hướng về màn hình chính
+        },
       ),
     );
   }
