@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
@@ -247,7 +248,7 @@ class HomeScreen extends StatefulWidget {
 
 // Đổi từ _HomeScreenState thành HomeScreenState để public
 class HomeScreenState extends State<HomeScreen> {
-  final String apiKey = '5c2992addc713b68f4ae73b75db853e4';
+  final String apiKey = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
   bool isLoading = true;
   WeatherData? weatherData;
   String? errorMessage;
