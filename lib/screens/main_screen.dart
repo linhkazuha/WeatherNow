@@ -11,6 +11,7 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _MainScreenState createState() => _MainScreenState();
 }
 
@@ -146,6 +147,7 @@ class _MainScreenState extends State<MainScreen> {
   void _removeLocation(String locationName) {
     _locationService.removeLocation(locationName).then((_) {
       _loadSavedLocations();
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Đã xóa "$locationName" khỏi danh sách'),

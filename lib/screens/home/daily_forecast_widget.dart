@@ -1,0 +1,130 @@
+import 'package:flutter/material.dart';
+import '../../models/weather_models.dart';
+
+class DailyForecastWidget extends StatelessWidget {
+  final List<DailyForecast> dailyForecast;
+  final Map<String, dynamic> themeData;
+
+  const DailyForecastWidget({
+    super.key,
+    required this.dailyForecast,
+    required this.themeData,
+  });
+
+  String _getWeatherIconUrl(String icon) {
+    return 'https://openweathermap.org/img/wn/$icon@2x.png';
+  }
+
+  String _formatDayOfWeek(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(Duration(days: 1));
+
+    if (date.year == today.year && date.month == today.month && date.day == today.day) {
+      return 'Hôm nay';
+    } else if (date.year == tomorrow.year && date.month == tomorrow.month && date.day == tomorrow.day) {
+      return 'Ngày mai';
+    } else {
+      final List<String> weekdays = [
+        'Chủ nhật',
+        'Thứ hai',
+        'Thứ ba',
+        'Thứ tư',
+        'Thứ năm',
+        'Thứ sáu',
+        'Thứ bảy',
+      ];
+      return weekdays[date.weekday % 7];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 8),
+        Card(
+          color: themeData['backCardColor'].withOpacity(0.7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: dailyForecast.isEmpty
+                ? Center(
+                    child: Text(
+                      'Không có dữ liệu dự báo theo ngày',
+                      style: TextStyle(
+                        color: themeData['mainText'],
+                      ),
+                    ),
+                  )
+                : Column(
+                    children: dailyForecast.map((daily) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                _formatDayOfWeek(daily.date),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: themeData['mainText'],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Image.network(
+                                _getWeatherIconUrl(daily.icon),
+                                width: 40,
+                                height: 40,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(
+                                    Icons.cloud,
+                                    size: 40,
+                                    color: themeData['auxiliaryText'],
+                                  );
+                                },
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '${daily.tempMin.round()}°',
+                                    style: TextStyle(
+                                      color: themeData['mainText'],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    '${daily.tempMax.round()}°',
+                                    style: TextStyle(
+                                      color: themeData['mainText'],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+}
