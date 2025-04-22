@@ -18,11 +18,12 @@ class ThemeProvider extends ChangeNotifier {
   void toggleTheme() {
     _isDarkMode = !_isDarkMode;
 
-      // Cập nhật thanh trạng thái dựa vào theme
+    // Cập nhật thanh trạng thái dựa vào theme
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: _isDarkMode ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness:
+            _isDarkMode ? Brightness.light : Brightness.dark,
       ),
     );
     notifyListeners();
@@ -59,8 +60,7 @@ final Map<String, dynamic> lightTheme = {
   "didyouknowButton": const Color(0xCCFFFFFF),
   "typeColor": const Color.fromARGB(255, 169, 229, 252),
   "typeBorderColor": const Color(0x99000000),
-  "didyouknowCardColor": const Color(0xFFE4F2FD),  
-
+  "didyouknowCardColor": const Color(0xFFE4F2FD),
 };
 
 final Map<String, dynamic> darkTheme = {
