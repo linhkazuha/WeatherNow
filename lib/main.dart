@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:weather_app/providers/settings_provider.dart';
 import 'firebase_options.dart';
 import 'screens/main_screen.dart';
 import 'providers/theme_provider.dart';
@@ -28,8 +29,11 @@ Future<void> main() async {
   );
   await dotenv.load(fileName: ".env");
   runApp(
-    ChangeNotifierProvider<ThemeProvider>(
-      create: (_) => ThemeProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+      ],
       child: MyApp(),
     ),
   );
@@ -43,16 +47,17 @@ class MyApp extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         final themeData = themeProvider.themeData;
-        
+
         // Màu chính - xanh dương nhạt (sử dụng từ theme provider)
         final primaryColor = themeData['auxiliaryText'];
-        final secondaryColor = themeProvider.isDarkMode 
-            ? themeData['backCardColor'] 
-            : themeData['typeColor'];
-            
+        final secondaryColor =
+            themeProvider.isDarkMode
+                ? themeData['backCardColor']
+                : themeData['typeColor'];
+
         // Màu overlay cho các card từ theme provider
         final cardOverlayColor = themeData['backCardColor'];
-        
+
         // Màu nền từ theme provider
         final backgroundColor = Colors.transparent;
 
@@ -72,9 +77,7 @@ class MyApp extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: themeData['mainText'],
               ),
-              iconTheme: IconThemeData(
-                color: themeData['mainText'],
-              ),
+              iconTheme: IconThemeData(color: themeData['mainText']),
             ),
             cardTheme: CardTheme(
               elevation: 2,
@@ -91,7 +94,8 @@ class MyApp extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               labelStyle: TextStyle(color: themeData['mainText']),
               secondaryLabelStyle: TextStyle(color: themeData['mainText']),
-              brightness: themeProvider.isDarkMode ? Brightness.dark : Brightness.light,
+              brightness:
+                  themeProvider.isDarkMode ? Brightness.dark : Brightness.light,
             ),
             colorScheme: ColorScheme(
               primary: primaryColor,
@@ -104,7 +108,8 @@ class MyApp extends StatelessWidget {
               onSurface: themeData['mainText'],
               onBackground: themeData['mainText'],
               onError: Colors.white,
-              brightness: themeProvider.isDarkMode ? Brightness.dark : Brightness.light,
+              brightness:
+                  themeProvider.isDarkMode ? Brightness.dark : Brightness.light,
             ),
             textTheme: TextTheme(
               bodyLarge: TextStyle(color: themeData['mainText']),
@@ -115,7 +120,7 @@ class MyApp extends StatelessWidget {
           ),
           home: MainScreen(),
         );
-      }
+      },
     );
   }
 }

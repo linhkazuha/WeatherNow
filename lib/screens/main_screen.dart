@@ -4,6 +4,7 @@ import 'package:weather_app/providers/theme_provider.dart';
 import 'package:weather_app/screens/home_screen.dart';
 import 'package:weather_app/screens/news/news_screen.dart';
 import 'package:weather_app/screens/maps/weather_map_screen.dart';
+import 'package:weather_app/screens/settings/settings_screen.dart';
 import 'package:weather_app/services/location_service.dart';
 import 'package:provider/provider.dart';
 
@@ -69,7 +70,14 @@ class _MainScreenState extends State<MainScreen> {
       ),
       WeatherMapScreen(),
       NewsScreen(),
-      _buildPlaceholderPage('Cài Đặt'),
+      SettingsScreen(
+        onSettingsChanged: () {
+          setState(() {
+            // Cập nhật giao diện nếu cần
+          });
+        },
+      ),
+      //_buildPlaceholderPage('Cài Đặt'),
     ];
   }
 
