@@ -533,7 +533,6 @@ class _MainScreenState extends State<MainScreen> {
 
   // Hàm lưu thông tin thời tiết của địa điểm hiện tại
   void _saveCurrentLocationWeather() {
-    // Lưu địa điểm mới cùng thông tin thời tiết
     if (_homeScreenKey.currentState != null) {
       final weatherData = _homeScreenKey.currentState?.weatherData;
       if (weatherData != null) {
@@ -545,12 +544,13 @@ class _MainScreenState extends State<MainScreen> {
               tempMax: weatherData.tempMax,
               description: weatherData.description,
               icon: weatherData.icon,
+              uvIndex: weatherData.uvIndex,
+              dewPoint: weatherData.dewPoint,
             )
             .then((_) {
               _loadSavedLocations();
             });
       } else {
-        // Nếu không có dữ liệu thời tiết, chỉ lưu tên địa điểm
         _locationService.saveLocation(_currentLocation).then((_) {
           _loadSavedLocations();
         });

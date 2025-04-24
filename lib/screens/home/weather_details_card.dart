@@ -11,28 +11,66 @@ class WeatherDetailsCard extends StatelessWidget {
     required this.themeData,
   });
 
-  Widget _buildWeatherDetail(
-    IconData icon,
-    String value,
-    String label,
-    Map<String, dynamic> themeData,
-  ) {
+  // Phương thức định dạng giá trị UV thành chuỗi
+  String _getUvLevelText(double uvIndex) {
+    if (uvIndex < 3) {
+      return 'Thấp';
+    } else if (uvIndex < 6) {
+      return 'Trung bình';
+    } else if (uvIndex < 8) {
+      return 'Cao';
+    } else if (uvIndex < 11) {
+      return 'Rất cao';
+    } else {
+      return 'Cực kỳ cao';
+    }
+  }
+
+  // Phương thức tạo một dòng thông tin
+  Widget _buildInfoRow({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String value,
+    bool showDivider = true,
+  }) {
     return Column(
       children: [
-        Icon(icon, color: themeData['auxiliaryText']),
-        SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: themeData['mainText'],
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: iconColor,
+                size: 24,
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: themeData['mainText'],
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  color: themeData['mainText'],
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ),
-        Text(
-          label,
-          style: TextStyle(color: themeData['auxiliaryText'], fontSize: 14),
-        ),
+        if (showDivider)
+          Divider(
+            color: themeData['separateLine'].withOpacity(0.3),
+            height: 1,
+          ),
       ],
     );
   }
@@ -45,44 +83,45 @@ class WeatherDetailsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildWeatherDetail(
-                  Icons.water_drop,
-                  '${weather.humidity}%',
-                  'Độ ẩm',
-                  themeData,
-                ),
-                _buildWeatherDetail(
-                  Icons.air,
-                  '${weather.windSpeed} m/s',
-                  'Gió',
-                  themeData,
-                ),
-              ],
+            _buildInfoRow(
+              icon: Icons.wb_sunny,
+              iconColor: Colors.orange,
+              label: 'Chỉ số UV',
+              value: _getUvLevelText(weather.uvIndex),
             ),
-            SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildWeatherDetail(
-                  Icons.speed,
-                  '${weather.pressure} hPa',
-                  'Áp suất',
-                  themeData,
-                ),
-                _buildWeatherDetail(
-                  Icons.visibility,
-                  '${(weather.visibility / 1000).toStringAsFixed(1)} km',
-                  'Tầm nhìn',
-                  themeData,
-                ),
-              ],
+            _buildInfoRow(
+              icon: Icons.water_drop,
+              iconColor: Colors.blue,
+              label: 'Độ ẩm',
+              value: '${weather.humidity}%',
+            ),
+            _buildInfoRow(
+              icon: Icons.air,
+              iconColor: Colors.lightBlue,
+              label: 'Tốc độ gió',
+              value: '${weather.windSpeed} m/s',
+            ),
+            _buildInfoRow(
+              icon: Icons.opacity,
+              iconColor: Colors.blueAccent,
+              label: 'Điểm sương',
+              value: '${weather.dewPoint.round()}°',
+            ),
+            _buildInfoRow(
+              icon: Icons.compress,
+              iconColor: Colors.brown,
+              label: 'Áp suất',
+              value: '${weather.pressure.toStringAsFixed(1)}mb',
+            ),
+            _buildInfoRow(
+              icon: Icons.visibility,
+              iconColor: Colors.cyan,
+              label: 'Tầm nhìn',
+              value: '${(weather.visibility / 1000).toStringAsFixed(2)} km',
+              showDivider: false,
             ),
           ],
         ),

@@ -11,6 +11,7 @@ import 'home/hourly_forecast_widget.dart';
 import 'home/daily_forecast_widget.dart';
 import 'home/weather_details_card.dart';
 import 'home/air_quality_card.dart';
+import 'home/sunrise_sunset_card.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(String)? onLocationChanged;
@@ -207,17 +208,81 @@ class HomeScreenState extends State<HomeScreen> {
               ),
 
               // Card chất lượng không khí
-              if (weather.airQuality != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 3.0,
-                  ),
-                  child: AirQualityCard(
-                    airQuality: weather.airQuality!,
-                    themeData: themeData,
-                  ),
+              // if (weather.airQuality != null)
+              //   Padding(
+              //     padding: const EdgeInsets.symmetric(
+              //       horizontal: 16.0,
+              //       vertical: 3.0,
+              //     ),
+              //     child: AirQualityCard(
+              //       airQuality: weather.airQuality!,
+              //       themeData: themeData,
+              //     ),
+              //   ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 3.0,
                 ),
+                child: weather.airQuality != null
+                    ? AirQualityCard(
+                        airQuality: weather.airQuality!,
+                        themeData: themeData,
+                      )
+                    : Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        color: themeData['backCardColor'].withOpacity(0.7),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.air,
+                                    color: themeData['auxiliaryText'],
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Chất lượng không khí',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: themeData['mainText'],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                              Center(
+                                child: Text(
+                                  'Không có dữ liệu chất lượng không khí',
+                                  style: TextStyle(
+                                    color: themeData['mainText'],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+              ),
+
+              // Card mặt trời mọc/lặn ở đây
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 3.0,
+                ),
+                child: SunriseSunsetCard(
+                  weather: weather,
+                  themeData: themeData,
+                ),
+              ),
 
               // Bản đồ mini
               Padding(

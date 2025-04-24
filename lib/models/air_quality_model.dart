@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class AirQuality {
   final int aqi; // Chỉ số chất lượng không khí (1-5)
   final Map<String, double> components; // Các chất ô nhiễm
@@ -47,20 +49,20 @@ class AirQuality {
   }
 
   // Màu hiển thị cho AQI
-  String get aqiColor {
+  Color get aqiColor {
     switch (aqi) {
       case 1:
-        return '#4CAF50'; // Xanh lá
+        return Color(0xFF4CAF50); // Xanh lá
       case 2:
-        return '#FFC107'; // Vàng
+        return Color(0xFFFFC107); // Vàng
       case 3:
-        return '#FF9800'; // Cam
+        return Color(0xFFFF9800); // Cam
       case 4:
-        return '#F44336'; // Đỏ
+        return Color(0xFFF44336); // Đỏ
       case 5:
-        return '#9C27B0'; // Tím
+        return Color(0xFF9C27B0); // Tím
       default:
-        return '#9E9E9E'; // Xám
+        return Color(0xFF9E9E9E); // Xám
     }
   }
 

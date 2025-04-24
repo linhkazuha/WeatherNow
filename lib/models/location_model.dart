@@ -6,6 +6,8 @@ class SavedLocation {
   final double tempMax;
   final String description;
   final String icon;
+  final double uvIndex; // Thêm chỉ số UV
+  final double dewPoint; // Thêm điểm sương
 
   SavedLocation({
     required this.name,
@@ -15,6 +17,8 @@ class SavedLocation {
     this.tempMax = 0,
     this.description = '',
     this.icon = '',
+    this.uvIndex = 0, // Giá trị mặc định
+    this.dewPoint = 0, // Giá trị mặc định
   });
 
   // Chuyển từ Map sang SavedLocation (để đọc từ SharedPreferences)
@@ -44,6 +48,8 @@ class SavedLocation {
       tempMax: parseDouble(map['tempMax']),
       description: map['description'] ?? '',
       icon: map['icon'] ?? '',
+      uvIndex: parseDouble(map['uvIndex']), // Đọc chỉ số UV
+      dewPoint: parseDouble(map['dewPoint']), // Đọc điểm sương
     );
   }
 
@@ -57,6 +63,8 @@ class SavedLocation {
       'tempMax': tempMax,
       'description': description,
       'icon': icon,
+      'uvIndex': uvIndex, // Lưu chỉ số UV
+      'dewPoint': dewPoint, // Lưu điểm sương
     };
   }
 }

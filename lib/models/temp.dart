@@ -35,6 +35,63 @@ class WeatherPoint {
   });
 }
 
+// Thêm các model mới từ home_screen.dart
+class AirQuality {
+  final int aqi;
+  final Map<String, double> components;
+
+  AirQuality({required this.aqi, required this.components});
+
+  factory AirQuality.fromJson(Map<String, dynamic> json) {
+    final list = json['list'][0];
+
+    return AirQuality(
+      aqi: list['main']['aqi'],
+      components: {
+        'co': list['components']['co'].toDouble(),
+        'no2': list['components']['no2'].toDouble(),
+        'o3': list['components']['o3'].toDouble(),
+        'pm2_5': list['components']['pm2_5'].toDouble(),
+        'pm10': list['components']['pm10'].toDouble(),
+      },
+    );
+  }
+
+  String get aqiDescription {
+    switch (aqi) {
+      case 1:
+        return 'Tốt';
+      case 2:
+        return 'Trung bình';
+      case 3:
+        return 'Kém';
+      case 4:
+        return 'Xấu';
+      case 5:
+        return 'Rất xấu';
+      default:
+        return 'Không xác định';
+    }
+  }
+
+  Color get aqiColor {
+    switch (aqi) {
+      case 1:
+        return Colors.green;
+      case 2:
+        return Colors.yellow;
+      case 3:
+        return Colors.orange;
+      case 4:
+        return Colors.red;
+      case 5:
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+}
+
 class WeatherData {
   final String cityName;
   final double temp;
@@ -49,8 +106,6 @@ class WeatherData {
   final double feelsLike;
   final DateTime? sunrise;
   final DateTime? sunset;
-  final double uvIndex;
-  final double dewPoint;
   final List<HourlyForecast> hourlyForecast;
   final List<DailyForecast> dailyForecast;
   final AirQuality? airQuality;
@@ -69,8 +124,6 @@ class WeatherData {
     required this.feelsLike,
     this.sunrise,
     this.sunset,
-    this.uvIndex = 0.0, 
-    this.dewPoint = 0.0,   
     required this.hourlyForecast,
     required this.dailyForecast,
     this.airQuality,
@@ -98,22 +151,6 @@ class WeatherData {
           current['sys']['sunset'] * 1000,
         );
       }
-    }
-    // Trong phương thức fromJson, thêm phần lấy dữ liệu UV từ JSON
-    double uvIndex = 0.0;
-    if (current['uvi'] != null) {
-      uvIndex = current['uvi'].toDouble();
-    }
-
-    // Tính điểm sương từ nhiệt độ và độ ẩm nếu không có trực tiếp từ API
-    double dewPoint = 0.0;
-    if (current['main']['dew_point'] != null) {
-      dewPoint = current['main']['dew_point'].toDouble();
-    } else {
-      // Công thức gần đúng tính điểm sương
-      final temp = current['main']['temp'].toDouble();
-      final humidity = current['main']['humidity'].toInt();
-      dewPoint = temp - ((100 - humidity) / 5);
     }
 
     List<HourlyForecast> hourlyList = [];
@@ -143,7 +180,8 @@ class WeatherData {
       final DateTime forecastTime = DateTime.fromMillisecondsSinceEpoch(
         item['dt'] * 1000,
       );
-      final String dateKey = '${forecastTime.year}-${forecastTime.month}-${forecastTime.day}';
+      final String dateKey =
+          '${forecastTime.year}-${forecastTime.month}-${forecastTime.day}';
 
       if (!dailyMap.containsKey(dateKey)) {
         dailyMap[dateKey] = DailyForecast(
@@ -198,14 +236,11 @@ class WeatherData {
       feelsLike: current['main']['feels_like'].toDouble(),
       sunrise: sunrise,
       sunset: sunset,
-      uvIndex: uvIndex,    
-      dewPoint: dewPoint, 
       hourlyForecast: hourlyList,
       dailyForecast: dailyList,
       airQuality: airQuality,
     );
   }
-
 }
 
 class HourlyForecast {

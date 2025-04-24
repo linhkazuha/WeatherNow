@@ -37,6 +37,8 @@ class LocationService {
     double tempMax = 0,
     String description = '',
     String icon = '',
+    double uvIndex = 0,  // Thêm tham số mới cho chỉ số UV
+    double dewPoint = 0, // Thêm tham số mới cho điểm sương
   }) async {
     if (locationName.isEmpty) return;
     
@@ -62,6 +64,8 @@ class LocationService {
         tempMax: tempMax,
         description: description,
         icon: icon,
+        uvIndex: uvIndex,  // Thêm chỉ số UV
+        dewPoint: dewPoint, // Thêm điểm sương
       ),
     );
     

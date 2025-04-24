@@ -9,11 +9,11 @@ class CurrentWeatherCard extends StatelessWidget {
   final VoidCallback onRefresh;
 
   const CurrentWeatherCard({
-    Key? key,
+    super.key,
     required this.weather,
     required this.themeData,
     required this.onRefresh,
-  }) : super(key: key);
+  });
 
   String _getWeatherIconUrl(String icon) {
     return 'https://openweathermap.org/img/wn/$icon@2x.png';

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:weather_app/models/air_quality_model.dart';
 import '../models/weather_models.dart';
 
 class WeatherApiService {
