@@ -1,13 +1,18 @@
+// service của map và thông báo
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/weather_models.dart';
+import 'package:geolocator/geolocator.dart';
 
 class WeatherService {
-  final String apiKey = dotenv.env['OpenWeather_API_key'] ?? '';
-
+  final String apiKey = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
+  static const String _baseUrl =
+      'https://api.openweathermap.org/data/3.0/onecall';
+  static const String _airQualityBaseUrl =
+      'http://api.openweathermap.org/data/2.5/air_pollution';
   // Cache for weather data
   final Map<String, WeatherPoint> _weatherCache = {};
   final Map<String, LatLng> _locationCache = {};
@@ -167,5 +172,139 @@ class WeatherService {
       debugPrint('Error fetching forecast data: $e');
       throw Exception('Failed to fetch forecast data: $e');
     }
+  }
+
+  Future<Map<String, dynamic>> fetchWeatherData(Position position) async {
+    final url = Uri.parse(
+      '$_baseUrl?lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey&units=metric&exclude=minutely&lang=vi',
+    );
+    print('API URL: $url');
+
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      print('Error response: ${response.body}');
+      throw Exception(
+        'Không thể lấy dữ liệu thời tiết: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchAirQuality(Position position) async {
+    final url = Uri.parse(
+      '$_airQualityBaseUrl?lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey&lang=vi',
+    );
+    print('Air Quality API URL: $url');
+
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      print('Air Quality Error response: ${response.body}');
+      throw Exception(
+        'Không thể lấy dữ liệu chất lượng không khí: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Map<String, dynamic> parseCurrentWeather(Map<String, dynamic> data) {
+    final current = data['current'];
+    return {
+      'temperature': current['temp']?.toDouble() ?? 0.0,
+      'humidity': current['humidity']?.toDouble() ?? 0.0,
+      'weather': current['weather'][0]['main']?.toString() ?? '',
+      'rain': current['rain']?['1h']?.toDouble() ?? 0.0,
+      'uvi': current['uvi']?.toDouble() ?? 0.0,
+      'wind_speed': current['wind_speed']?.toDouble() ?? 0.0,
+    };
+  }
+
+  List<Map<String, dynamic>> parseDailyForecast(Map<String, dynamic> data) {
+    final List<dynamic> daily = data['daily'];
+    final today = DateTime.now();
+    final tomorrow = today.add(const Duration(days: 1));
+
+    // Lấy dữ liệu cho hôm nay và ngày mai
+    final todayData = daily.firstWhere((item) {
+      final date = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
+      return date.day == today.day;
+    }, orElse: () => null);
+
+    final tomorrowData = daily.firstWhere((item) {
+      final date = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
+      return date.day == tomorrow.day;
+    }, orElse: () => null);
+    return [
+      if (todayData != null)
+        {
+          'temperature': todayData['temp']['day']?.toDouble() ?? 0.0,
+          'condition':
+              todayData['weather'][0]['description']?.toString() ?? 'N/A',
+          'humidity': todayData['humidity']?.toDouble() ?? 0.0,
+          'wind_speed': todayData['wind_speed']?.toDouble() ?? 0.0,
+          'uvi': todayData['uvi']?.toDouble() ?? 0.0,
+        }
+      else
+        {
+          'temperature': 0.0,
+          'condition': 'N/A',
+          'humidity': 0.0,
+          'wind_speed': 0.0,
+          'uvi': 0.0,
+        },
+      if (tomorrowData != null)
+        {
+          'temperature': tomorrowData['temp']['day']?.toDouble() ?? 0.0,
+          'condition':
+              tomorrowData['weather'][0]['description']?.toString() ?? 'N/A',
+          'humidity': tomorrowData['humidity']?.toDouble() ?? 0.0,
+          'wind_speed': tomorrowData['wind_speed']?.toDouble() ?? 0.0,
+          'uvi': tomorrowData['uvi']?.toDouble() ?? 0.0,
+        }
+      else
+        {
+          'temperature': 0.0,
+          'condition': 'N/A',
+          'humidity': 0.0,
+          'wind_speed': 0.0,
+          'uvi': 0.0,
+        },
+    ];
+  }
+
+  Map<String, dynamic> parseHourlyForecast(Map<String, dynamic> data) {
+    final List<dynamic> hourly = data['hourly'];
+    final now = DateTime.now();
+    final nextHour = now.add(const Duration(hours: 1));
+
+    // Lấy dữ liệu trong 1 giờ tới
+    final nextHourData = hourly.firstWhere((item) {
+      final date = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
+      return date.isBefore(nextHour) && date.isAfter(now);
+    }, orElse: () => null);
+    if (nextHourData == null) {
+      return {
+        'rain': 0.0,
+        'weather': '',
+        'temperature': 0.0,
+        'humidity': 0.0,
+        'uvi': 0.0,
+        'wind_speed': 0.0,
+      };
+    }
+
+    return {
+      'rain': nextHourData['rain']?['1h']?.toDouble() ?? 0.0,
+      'weather': nextHourData['weather'][0]['main']?.toString() ?? '',
+      'temperature': nextHourData['temp']?.toDouble() ?? 0.0,
+      'humidity': nextHourData['humidity']?.toDouble() ?? 0.0,
+      'uvi': nextHourData['uvi']?.toDouble() ?? 0.0,
+      'wind_speed': nextHourData['wind_speed']?.toDouble() ?? 0.0,
+    };
+  }
+
+  int parseAirQuality(Map<String, dynamic> data) {
+    return data['list'][0]['main']['aqi'] ?? 1;
   }
 }

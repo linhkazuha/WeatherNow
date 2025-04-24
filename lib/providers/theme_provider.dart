@@ -61,6 +61,7 @@ final Map<String, dynamic> lightTheme = {
   "typeColor": const Color.fromARGB(255, 169, 229, 252),
   "typeBorderColor": const Color(0x99000000),
   "didyouknowCardColor": const Color(0xFFE4F2FD),
+  "primaryButtonColor": const Color(0xFF138BC0),
 };
 
 final Map<String, dynamic> darkTheme = {
@@ -69,8 +70,10 @@ final Map<String, dynamic> darkTheme = {
     end: Alignment.bottomCenter,
     colors: [Color(0xFF151A3A), Color(0xFF101A5F)],
   ),
-  "mainText": const Color(0xFFEFF5F1),
-  "auxiliaryText": const Color(0xFF9599B6),
+  // "mainText": const Color(0xFFEFF5F1),
+  "mainText": const Color(0xFFFFFFFF),
+  // "auxiliaryText": const Color(0xFF9599B6),
+  "auxiliaryText": const Color(0xFFB0B4D6),
   "currentWeatherCardColor": Colors.transparent,
   "backCardColor": const Color(0xFF3C437A),
   "separateLine": const Color(0xFFBCC1E6),
@@ -79,7 +82,10 @@ final Map<String, dynamic> darkTheme = {
   "cardLocationColor": const Color(0xFF3C437A),
   "cardLocationBorderColor": const Color(0x99FFFFFF),
   "didyouknowButton": const Color(0xCCFFFFFF),
-  "typeColor": const Color(0xFF3C437A),
+  // "typeColor": const Color(0xFF3C437A),
+  "typeColor": const Color(0xFF5A6299),
   "typeBorderColor": const Color(0x99FFFFFF),
   "didyouknowCardColor": const Color(0xFF2C2F50),
+  // "primaryButtonColor": const Color(0xFF3C437A),
+  "primaryButtonColor": const Color(0xFF6A74C9),
 };

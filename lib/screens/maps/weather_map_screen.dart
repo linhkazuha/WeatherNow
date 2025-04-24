@@ -537,7 +537,7 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
         ],
       ),
       child: IconButton(
-        icon: const Icon(Icons.home, color: Colors.black87),
+        icon: const Icon(Icons.fullscreen_exit, color: Colors.black87),
         onPressed: () {
           Navigator.of(context).pop(); // Điều hướng về màn hình chính
         },
