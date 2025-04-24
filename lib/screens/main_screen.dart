@@ -5,6 +5,7 @@ import 'package:weather_app/screens/home_screen.dart';
 import 'package:weather_app/screens/news/news_screen.dart';
 import 'package:weather_app/screens/maps/weather_map_screen.dart';
 import 'package:weather_app/screens/settings/settings_screen.dart';
+import 'package:weather_app/screens/alerts/alerts_screen.dart';
 import 'package:weather_app/services/location_service.dart';
 import 'package:provider/provider.dart';
 
@@ -19,10 +20,12 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   String _currentLocation = 'Trang Chủ';
+  // ignore: unused_field
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   final LocationService _locationService = LocationService();
   List<SavedLocation> _savedLocations = [];
+  // ignore: unused_field
   bool _isSearching = false;
 
   // Tạo key cho HomeScreen để truy cập từ bên ngoài
@@ -36,6 +39,7 @@ class _MainScreenState extends State<MainScreen> {
     'Bản Đồ',
     'Bạn có biết',
     'Cài Đặt',
+    'Thông báo & Cảnh báo',
   ];
 
   @override
@@ -77,10 +81,11 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
       ),
-      //_buildPlaceholderPage('Cài Đặt'),
+      AlertsScreen(),
     ];
   }
 
+  // ignore: unused_element
   Widget _buildPlaceholderPage(String title) {
     // Lấy màu từ theme thay vì sử dụng giá trị cố định
     return Consumer<ThemeProvider>(
@@ -185,6 +190,20 @@ class _MainScreenState extends State<MainScreen> {
               elevation: 0,
               backgroundColor: Colors.transparent,
               iconTheme: IconThemeData(color: themeData['mainText']),
+              actions: [
+                // Thêm nút thông báo
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedIndex = 4; // chuyển đến màn hình AlertScreen
+                    });
+                  },
+                  icon: Icon(
+                    Icons.notifications_outlined,
+                    color: themeData['mainText'],
+                  ),
+                ),
+              ],
             ),
             drawer: _buildDrawer(themeData),
             body: _pages[_selectedIndex],

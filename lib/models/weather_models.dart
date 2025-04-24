@@ -143,7 +143,8 @@ class WeatherData {
       final DateTime forecastTime = DateTime.fromMillisecondsSinceEpoch(
         item['dt'] * 1000,
       );
-      final String dateKey = '${forecastTime.year}-${forecastTime.month}-${forecastTime.day}';
+      final String dateKey =
+          '${forecastTime.year}-${forecastTime.month}-${forecastTime.day}';
 
       if (!dailyMap.containsKey(dateKey)) {
         dailyMap[dateKey] = DailyForecast(

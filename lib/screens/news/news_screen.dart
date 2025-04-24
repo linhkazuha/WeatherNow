@@ -56,13 +56,15 @@ class _NewsScreenState extends State<NewsScreen> {
     setState(() {
       _isSearching = true;
     });
-    
+
     // Cập nhật AppBar khi bắt đầu tìm kiếm
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final scaffold = Scaffold.of(context);
       if (scaffold.hasAppBar) {
         try {
-          scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(() {});
+          scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(
+            () {},
+          );
         } catch (e) {
           print("Không thể cập nhật AppBar: $e");
         }
@@ -76,13 +78,15 @@ class _NewsScreenState extends State<NewsScreen> {
       _searchQuery = '';
       _searchController.clear();
     });
-    
+
     // Cập nhật AppBar khi dừng tìm kiếm
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final scaffold = Scaffold.of(context);
       if (scaffold.hasAppBar) {
         try {
-          scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(() {});
+          scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(
+            () {},
+          );
         } catch (e) {
           print("Không thể cập nhật AppBar: $e");
         }
@@ -110,6 +114,7 @@ class _NewsScreenState extends State<NewsScreen> {
               // Thêm nút search vào AppBar
               if (_isSearching) {
                 // Hiển thị SearchBar khi đang tìm kiếm
+                // ignore: unused_local_variable
                 final appBarWidget = AppBar(
                   title: TextField(
                     controller: _searchController,
@@ -117,7 +122,9 @@ class _NewsScreenState extends State<NewsScreen> {
                     decoration: InputDecoration(
                       hintText: 'Tìm kiếm hiện tượng thời tiết...',
                       border: InputBorder.none,
-                      hintStyle: TextStyle(color: themeData['mainText'].withOpacity(0.7)),
+                      hintStyle: TextStyle(
+                        color: themeData['mainText'].withOpacity(0.7),
+                      ),
                     ),
                     style: TextStyle(color: themeData['mainText']),
                     onChanged: _handleSearch,
@@ -127,12 +134,13 @@ class _NewsScreenState extends State<NewsScreen> {
                   actions: [
                     IconButton(
                       icon: Icon(Icons.close, color: themeData['mainText']),
-                      onPressed: _stopSearch
+                      onPressed: _stopSearch,
                     ),
                   ],
                 );
               } else {
                 // Hiển thị icon search khi không tìm kiếm
+                // ignore: unused_local_variable
                 final appBarWidget = AppBar(
                   title: Text(
                     'Bạn có biết',
@@ -148,8 +156,10 @@ class _NewsScreenState extends State<NewsScreen> {
                   ],
                 );
               }
-              
-              scaffold.context.findAncestorStateOfType<ScaffoldState>()?.setState(() {});
+
+              scaffold.context
+                  .findAncestorStateOfType<ScaffoldState>()
+                  ?.setState(() {});
             } catch (e) {
               print("Không thể cập nhật AppBar: $e");
             }
@@ -162,7 +172,10 @@ class _NewsScreenState extends State<NewsScreen> {
             if (!_isSearching)
               // Thay thế phần hiện tại có icon tìm kiếm với một TextField đầy đủ
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Container(
                   decoration: BoxDecoration(
                     color: themeData['searchFieldColor'],
@@ -183,7 +196,10 @@ class _NewsScreenState extends State<NewsScreen> {
                       hintStyle: TextStyle(
                         color: themeData['mainText'].withOpacity(0.5),
                       ),
-                      prefixIcon: Icon(Icons.search, color: themeData['mainText'].withOpacity(0.6)),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: themeData['mainText'].withOpacity(0.6),
+                      ),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -193,13 +209,19 @@ class _NewsScreenState extends State<NewsScreen> {
 
             if (_isSearching)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: TextField(
                   controller: _searchController,
                   autofocus: true,
                   decoration: InputDecoration(
                     hintText: 'Bạn đang tìm gì?',
-                    prefixIcon: Icon(Icons.search, color: themeData['mainText']),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: themeData['mainText'],
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(Icons.close, color: themeData['mainText']),
                       onPressed: _stopSearch,
@@ -243,13 +265,21 @@ class _NewsScreenState extends State<NewsScreen> {
                               color: () {
                                 if (isSelected) {
                                   final Color mainText = themeData['mainText'];
-                                  final double luminance = (0.299 * mainText.red + 0.587 * mainText.green + 0.114 * mainText.blue);
-                                  return luminance < 186 ? Color(0xFFEFF5F1) : Color(0xFF1E1F33);
+                                  final double luminance =
+                                      (0.299 * mainText.red +
+                                          0.587 * mainText.green +
+                                          0.114 * mainText.blue);
+                                  return luminance < 186
+                                      ? Color(0xFFEFF5F1)
+                                      : Color(0xFF1E1F33);
                                 } else {
                                   return themeData['mainText'];
                                 }
                               }(),
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                             ),
 
                             shape: RoundedRectangleBorder(
@@ -258,7 +288,8 @@ class _NewsScreenState extends State<NewsScreen> {
                                 color:
                                     isSelected
                                         ? themeData['typeBorderColor']
-                                        : themeData['typeBorderColor'].withOpacity(0.2),
+                                        : themeData['typeBorderColor']
+                                            .withOpacity(0.2),
                                 width: 1,
                               ),
                             ),
@@ -277,9 +308,11 @@ class _NewsScreenState extends State<NewsScreen> {
             Expanded(
               child:
                   !_isFirebaseInitialized
-                      ? Center(child: CircularProgressIndicator(
+                      ? Center(
+                        child: CircularProgressIndicator(
                           color: themeData['mainText'],
-                        ))
+                        ),
+                      )
                       : StreamBuilder<QuerySnapshot>(
                         stream:
                             _selectedCategory == 'Tất cả'
@@ -294,10 +327,13 @@ class _NewsScreenState extends State<NewsScreen> {
                                     )
                                     .snapshots(),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator(
-                              color: themeData['mainText'],
-                            ));
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: themeData['mainText'],
+                              ),
+                            );
                           }
 
                           if (snapshot.hasError) {
@@ -309,7 +345,8 @@ class _NewsScreenState extends State<NewsScreen> {
                             );
                           }
 
-                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
                             return Center(
                               child: Text(
                                 'Không có dữ liệu hiện tượng thời tiết',
@@ -325,7 +362,8 @@ class _NewsScreenState extends State<NewsScreen> {
                             if (_searchQuery.isNotEmpty) {
                               docs =
                                   docs.where((doc) {
-                                    final data = doc.data() as Map<String, dynamic>;
+                                    final data =
+                                        doc.data() as Map<String, dynamic>;
                                     final name =
                                         (data['name'] ?? '')
                                             .toString()
@@ -347,7 +385,9 @@ class _NewsScreenState extends State<NewsScreen> {
                                       SizedBox(height: 16),
                                       Text(
                                         'Không tìm thấy kết quả cho "$_searchQuery"',
-                                        style: TextStyle(color: themeData['mainText']),
+                                        style: TextStyle(
+                                          color: themeData['mainText'],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -375,9 +415,12 @@ class _NewsScreenState extends State<NewsScreen> {
                                         builder:
                                             (context) => DetailScreen(
                                               title: data['name'] ?? '',
-                                              imageUrl: data['image_link'] ?? '',
-                                              description: data['content'] ?? '',
-                                              reference: data['reference'] ?? '',
+                                              imageUrl:
+                                                  data['image_link'] ?? '',
+                                              description:
+                                                  data['content'] ?? '',
+                                              reference:
+                                                  data['reference'] ?? '',
                                             ),
                                       ),
                                     );
@@ -398,7 +441,7 @@ class _NewsScreenState extends State<NewsScreen> {
             ),
           ],
         );
-      }
+      },
     );
   }
 

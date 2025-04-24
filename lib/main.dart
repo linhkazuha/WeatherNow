@@ -7,6 +7,7 @@ import 'firebase_options.dart';
 import 'screens/main_screen.dart';
 import 'providers/theme_provider.dart';
 import 'package:flutter/services.dart';
+import 'package:weather_app/providers/location_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => LocationProvider()),
       ],
       child: MyApp(),
     ),
