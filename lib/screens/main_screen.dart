@@ -8,6 +8,8 @@ import 'package:weather_app/screens/settings/settings_screen.dart';
 import 'package:weather_app/screens/alerts/alerts_screen.dart';
 import 'package:weather_app/services/location_service.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:intl/intl.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -169,6 +171,24 @@ class _MainScreenState extends State<MainScreen> {
       );
     });
   }
+
+  // Thêm hàm chia sẻ cho location
+  void _shareLocation(SavedLocation location) {
+    final formatter = DateFormat('HH:mm dd/MM/yyyy');
+    final currentTime = formatter.format(DateTime.now());
+    
+    String shareText = """
+  📍 ${location.name}
+  🕒 Cập nhật: $currentTime
+  🌡️ ${location.temp.round()}°C
+  ☁️ ${location.description}
+
+  Được chia sẻ từ ứng dụng WeatherNow
+  """;
+    
+    Share.share(shareText);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -528,10 +548,23 @@ class _MainScreenState extends State<MainScreen> {
               onSelected: (value) {
                 if (value == 'delete') {
                   _removeLocation(location.name);
+                } else if (value == 'share') {  // Thêm case mới
+                  _shareLocation(location);
                 }
               },
               itemBuilder:
                   (BuildContext context) => <PopupMenuEntry<String>>[
+                    // Thêm tùy chọn Chia sẻ
+                    PopupMenuItem<String>(
+                      value: 'share',
+                      child: Row(
+                        children: [
+                          Icon(Icons.share, color: Colors.blue, size: 20),
+                          SizedBox(width: 8),
+                          Text('Chia sẻ'),
+                        ],
+                      ),
+                    ),
                     PopupMenuItem<String>(
                       value: 'delete',
                       child: Row(
