@@ -237,7 +237,7 @@ class _MainScreenState extends State<MainScreen> {
     return Drawer(
       child: Container(
         decoration: BoxDecoration(
-          color: themeData['sideBarColor'].withOpacity(0.5),
+          color: themeData['sideBarColor'],
         ),
 
         child: SafeArea(

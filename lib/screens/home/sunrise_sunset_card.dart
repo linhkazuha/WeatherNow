@@ -65,7 +65,7 @@ class SunriseSunsetCard extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(
-              height: 160,
+              height:120,
               child: CustomPaint(
                 painter: SunPathPainter(
                   sunPosition: sunPosition,
@@ -78,55 +78,65 @@ class SunriseSunsetCard extends StatelessWidget {
               ),
             ),
             
-            // Thời gian mặt trời mọc và lặn
             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+              padding: const EdgeInsets.only(top: 1.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Mặt trời mọc',
-                        style: TextStyle(
-                          color: themeData['mainText'],
-                          fontSize: 15,
+                  // Đảm bảo cột mặt trời mọc ở bên trái
+                  Container(
+                    width: 100, // Chiều rộng cố định
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start, // Căn trái
+                      children: [
+                        Text(
+                          'Mặt trời mọc',
+                          style: TextStyle(
+                            color: themeData['auxiliaryText'],
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                      Text(
-                        sunriseTime,
-                        style: TextStyle(
-                          color: themeData['mainText'],
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          sunriseTime,
+                          style: TextStyle(
+                            color: themeData['mainText'],
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Mặt trời lặn',
-                        style: TextStyle(
-                          color: themeData['mainText'],
-                          fontSize: 15,
+
+                  // Cột mặt trời lặn ở bên phải (giữ nguyên)
+                  Container(
+                    width: 100, 
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Mặt trời lặn',
+                          style: TextStyle(
+                            color: themeData['auxiliaryText'],
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                      Text(
-                        sunsetTime,
-                        style: TextStyle(
-                          color: themeData['mainText'],
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          sunsetTime,
+                          style: TextStyle(
+                            color: themeData['mainText'],
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -135,11 +145,11 @@ class SunriseSunsetCard extends StatelessWidget {
 }
 
 class SunPathPainter extends CustomPainter {
-  final double sunPosition; // 0.0 - 1.0
+  final double sunPosition; 
   final Color pathColor;
   final Color sunColor;
   final bool isDarkMode;
-  final bool showSun; // Biến để kiểm soát việc hiển thị mặt trời
+  final bool showSun; 
 
   SunPathPainter({
     required this.sunPosition,
@@ -157,17 +167,20 @@ class SunPathPainter extends CustomPainter {
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
-    final lineY = size.height * 0.85;
+    final lineY = size.height * 0.95;
     canvas.drawLine(
       Offset(0, lineY),
       Offset(size.width, lineY),
       linePaint,
     );
 
+    // Điều chỉnh điểm bắt đầu và kết thúc để đường cong không trùng với 2 đầu đường thẳng
+    final padding = size.width * 0.1; // 10% padding ở hai bên
+    final startPoint = Offset(padding, lineY);
+    final endPoint = Offset(size.width - padding, lineY);
+    
     // Điểm kiểm soát cho đường cong
-    final controlPoint = Offset(size.width / 2, lineY - size.height * 0.8);
-    final startPoint = Offset(0, lineY);
-    final endPoint = Offset(size.width, lineY);
+    final controlPoint = Offset(size.width / 2, lineY - size.height * 1.4);
 
     // Vẽ đường cong đầy đủ với màu mờ
     final fullPathPaint = Paint()
@@ -192,13 +205,6 @@ class SunPathPainter extends CustomPainter {
         ..color = pathColor
         ..strokeWidth = 2.0
         ..style = PaintingStyle.stroke;
-
-      // Tính toán điểm kết thúc của đường màu vàng
-      final currentX = sunPosition * size.width;
-      
-      // Vẽ phần cụ thể của đường cong từ đầu đến vị trí mặt trời
-      final activePath = Path();
-      activePath.moveTo(startPoint.dx, startPoint.dy);
       
       // Tìm điểm trên đường cong tại vị trí hiện tại của mặt trời
       // Sử dụng phương trình tham số của đường cong Bezier bậc hai
