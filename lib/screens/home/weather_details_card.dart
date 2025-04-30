@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../models/weather_models.dart';
+import '../../utils/conversion_utils.dart';
 
 class WeatherDetailsCard extends StatelessWidget {
   final WeatherData weather;
   final Map<String, dynamic> themeData;
+  final String temperatureUnit;
 
   const WeatherDetailsCard({
     super.key,
     required this.weather,
     required this.themeData,
+    required this.temperatureUnit,
   });
 
   String _getUvLevelText(double uvIndex) {
@@ -69,7 +72,8 @@ class WeatherDetailsCard extends StatelessWidget {
                   icon: Icons.opacity,
                   iconColor: Colors.blueAccent,
                   label: 'Điểm sương',
-                  value: '${weather.dewPoint.round()}°',
+                  value:
+                      '${convertTemperature(weather.dewPoint, temperatureUnit).round()}°$temperatureUnit',
                 ),
               ),
             ],
@@ -110,9 +114,7 @@ class WeatherDetailsCard extends StatelessWidget {
     return Card(
       elevation: 0,
       color: themeData['backCardColor'].withOpacity(0.8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -120,11 +122,7 @@ class WeatherDetailsCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  color: iconColor,
-                  size: 22,
-                ),
+                Icon(icon, color: iconColor, size: 22),
                 const SizedBox(width: 8),
                 Text(
                   label,

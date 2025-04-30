@@ -188,6 +188,7 @@ class HomeScreenState extends State<HomeScreen> {
                     child: HourlyForecastWidget(
                       hourlyForecast: weather.hourlyForecast,
                       themeData: themeData,
+                      temperatureUnit: temperatureUnit,
                     ),
                   ),
 
@@ -213,6 +214,7 @@ class HomeScreenState extends State<HomeScreen> {
                     child: WeatherDetailsCard(
                       weather: weather,
                       themeData: themeData,
+                      temperatureUnit: temperatureUnit,
                     ),
                   ),
 
