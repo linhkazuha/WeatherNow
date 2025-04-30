@@ -2,17 +2,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/weather_models.dart';
+import '../../utils/conversion_utils.dart';
 
 class CurrentWeatherCard extends StatelessWidget {
   final WeatherData weather;
   final Map<String, dynamic> themeData;
   final VoidCallback onRefresh;
+  final String temperatureUnit;
 
   const CurrentWeatherCard({
     super.key,
     required this.weather,
     required this.themeData,
     required this.onRefresh,
+    required this.temperatureUnit,
   });
 
   String _getWeatherIconUrl(String icon) {
@@ -24,9 +27,7 @@ class CurrentWeatherCard extends StatelessWidget {
     return Card(
       elevation: 0,
       color: themeData['currentWeatherCardColor'],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -47,10 +48,7 @@ class CurrentWeatherCard extends StatelessWidget {
                   ],
                 ),
                 IconButton(
-                  icon: Icon(
-                    Icons.refresh,
-                    color: themeData['mainText'],
-                  ),
+                  icon: Icon(Icons.refresh, color: themeData['mainText']),
                   onPressed: onRefresh,
                 ),
               ],
@@ -62,7 +60,7 @@ class CurrentWeatherCard extends StatelessWidget {
                 Column(
                   children: [
                     Text(
-                      '${weather.temp.round()}°',
+                      '${convertTemperature(weather.temp, temperatureUnit).round()}°$temperatureUnit',
                       style: TextStyle(
                         fontSize: 60,
                         fontWeight: FontWeight.w500,
@@ -70,7 +68,7 @@ class CurrentWeatherCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${weather.tempMin.round()}° / ${weather.tempMax.round()}°',
+                      '${convertTemperature(weather.tempMin, temperatureUnit).round()}° / ${convertTemperature(weather.tempMax, temperatureUnit).round()}°$temperatureUnit',
                       style: TextStyle(
                         fontSize: 16,
                         color: themeData['auxiliaryText'],
@@ -109,16 +107,13 @@ class CurrentWeatherCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.thermostat,
-                  color: themeData['auxiliaryText'],
-                ),
+                Icon(Icons.thermostat, color: themeData['auxiliaryText']),
                 SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${weather.feelsLike.round()}°',
+                      '${convertTemperature(weather.feelsLike, temperatureUnit).round()}°$temperatureUnit',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

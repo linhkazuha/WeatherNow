@@ -29,11 +29,15 @@ Future<void> main() async {
     ),
   );
   await dotenv.load(fileName: ".env");
+
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.loadTemperatureUnit();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider.value(value: settingsProvider),
         ChangeNotifierProvider(create: (_) => LocationProvider()),
       ],
       child: MyApp(),
