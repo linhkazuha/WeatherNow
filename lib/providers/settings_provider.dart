@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsProvider with ChangeNotifier {
   // Đơn vị
   String _temperatureUnit = 'C'; // Celsius
   String _windSpeedUnit = 'km/h'; // Kilometers per hour
-  String _pressureUnit = 'hPa'; // Millibar
+  String _pressureUnit = 'hPa'; // Hectopascal
   String _distanceUnit = 'km'; // Kilometers
 
   // Cài đặt khác
@@ -22,8 +23,19 @@ class SettingsProvider with ChangeNotifier {
   bool get isNotificationEnabled => _isNotificationEnabled;
 
   // Setters
-  void setTemperatureUnit(String unit) {
+  Future<void> setTemperatureUnit(String unit) async {
     _temperatureUnit = unit;
+    notifyListeners();
+
+    // Lưu đơn vị nhiệt độ vào SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('temperatureUnit', unit);
+  }
+
+  Future<void> loadTemperatureUnit() async {
+    final prefs = await SharedPreferences.getInstance();
+    _temperatureUnit =
+        prefs.getString('temperatureUnit') ?? 'C'; // Mặc định là 'C'
     notifyListeners();
   }
 
