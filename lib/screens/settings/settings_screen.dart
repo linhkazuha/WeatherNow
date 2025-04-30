@@ -12,7 +12,7 @@ class SettingsScreen extends StatelessWidget {
     final settingsProvider = Provider.of<SettingsProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Cài Đặt'), centerTitle: true),
+      //appBar: AppBar(title: Text('Cài Đặt'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
