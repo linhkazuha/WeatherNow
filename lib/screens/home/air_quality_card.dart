@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/models/air_quality_model.dart';
 
-class AirQualityCard extends StatelessWidget {
+class AirQualityCard extends StatefulWidget {
   final AirQuality airQuality;
   final Map<String, dynamic> themeData;
 
@@ -11,12 +11,13 @@ class AirQualityCard extends StatelessWidget {
     required this.themeData,
   });
 
-  // Phương thức để lấy giá trị (0-100%) tương ứng với AQI
-  double _getAqiPercentage() {
-    // Mỗi cấp độ AQI chiếm 20% của thanh (vì có 5 cấp độ)
-    return (airQuality.aqi / 5) * 100;
-  }
+  @override
+  State<AirQualityCard> createState() => _AirQualityCardState();
+}
 
+class _AirQualityCardState extends State<AirQualityCard> {
+  bool _showDetails = false;
+  
   // Lấy màu tương ứng với mức AQI
   Color _getAqiColorForLevel(int aqi) {
     switch (aqi) {
@@ -31,41 +32,62 @@ class AirQualityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final aqiColor = _getAqiColorForLevel(widget.airQuality.aqi);
+    
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      color: themeData['backCardColor'].withOpacity(0.8),
+      color: widget.themeData['backCardColor'].withOpacity(0.8),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Tiêu đề và chỉ số AQI
-            Center(
-              child: Text(
-                'AQI',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: themeData['mainText'],
+            // Tiêu đề và nút dropdown
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                // Tiêu đề ở chính giữa
+                Center(
+                  child: Text(
+                    'AQI',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: widget.themeData['mainText'],
+                    ),
+                  ),
                 ),
-              ),
+                // Nút dropdown ở bên phải
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    icon: Icon(
+                      _showDetails ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      color: widget.themeData['auxiliaryText'],
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _showDetails = !_showDetails;
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
             
             // Mô tả tình trạng chất lượng không khí
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  'Không tốt cho sức khỏe đối với\ncác nhóm nhạy cảm (${airQuality.aqi})',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: airQuality.aqiColor,
-                  ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                'Không tốt cho sức khỏe đối với\ncác nhóm nhạy cảm (${widget.airQuality.aqi})',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: aqiColor,
                 ),
               ),
             ),
@@ -75,42 +97,37 @@ class AirQualityCard extends StatelessWidget {
               margin: EdgeInsets.symmetric(vertical: 12),
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: airQuality.aqiColor.withOpacity(0.2),
+                color: aqiColor.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: airQuality.aqiColor),
+                border: Border.all(color: aqiColor),
               ),
               child: Text(
-                airQuality.healthRecommendation,
+                widget.airQuality.healthRecommendation,
                 style: TextStyle(
-                  color: themeData['mainText'],
+                  color: widget.themeData['mainText'],
                   fontSize: 14,
                 ),
               ),
             ),
             
-            // Danh sách các chỉ số ô nhiễm
-            _buildPollutantsList(),
+            // Chi tiết các chỉ số ô nhiễm (hiển thị khi nhấn dropdown)
+            if (_showDetails) _buildPollutantsList(),
           ],
         ),
       ),
     );
-  }
-  
-  // Giữ nguyên AQI với 5 giá trị gốc (không chuyển đổi sang thang đo khác)
-  int _getAqiValue(int aqi) {
-    return aqi; // Giữ nguyên giá trị từ 1-5
   }
 
   // Danh sách các chỉ số ô nhiễm - với thanh ngăn cách
   Widget _buildPollutantsList() {
     // Sử dụng cấu trúc dữ liệu an toàn hơn với kiểu rõ ràng
     final List<Map<String, dynamic>> pollutants = [
-      {'name': 'PM2.5', 'value': airQuality.components['pm2_5'] ?? 0.0},
-      {'name': 'PM10', 'value': airQuality.components['pm10'] ?? 0.0},
-      {'name': 'O3', 'value': airQuality.components['o3'] ?? 0.0},
-      {'name': 'SO2', 'value': airQuality.components['so2'] ?? 0.0},
-      {'name': 'NO2', 'value': airQuality.components['no2'] ?? 0.0},
-      {'name': 'CO', 'value': airQuality.components['co'] ?? 0.0},
+      {'name': 'PM2.5', 'value': widget.airQuality.components['pm2_5'] ?? 0.0},
+      {'name': 'PM10', 'value': widget.airQuality.components['pm10'] ?? 0.0},
+      {'name': 'O3', 'value': widget.airQuality.components['o3'] ?? 0.0},
+      {'name': 'SO2', 'value': widget.airQuality.components['so2'] ?? 0.0},
+      {'name': 'NO2', 'value': widget.airQuality.components['no2'] ?? 0.0},
+      {'name': 'CO', 'value': widget.airQuality.components['co'] ?? 0.0},
     ];
 
     return Column(
@@ -134,14 +151,14 @@ class AirQualityCard extends StatelessWidget {
                   name,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: themeData['mainText'],
+                    color: widget.themeData['mainText'],
                   ),
                 ),
                 Text(
                   '${value.toStringAsFixed(1)} μg/m³',
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: themeData['auxiliaryText'],
+                    color: widget.themeData['auxiliaryText'],
                   ),
                 ),
               ],
@@ -150,13 +167,11 @@ class AirQualityCard extends StatelessWidget {
         } else {
           // Nếu index lẻ, thì đây là một thanh phân cách
           return Divider(
-            color: themeData['separateLine']?.withOpacity(0.3) ?? Colors.grey.withOpacity(0.3),
+            color: widget.themeData['separateLine']?.withOpacity(0.3) ?? Colors.grey.withOpacity(0.3),
             height: 1,
           );
         }
       }),
     );
   }
-
-  // Đã loại bỏ các hàm không cần thiết vì không còn sử dụng thanh màu sắc cho mỗi chỉ số ô nhiễm
 }
