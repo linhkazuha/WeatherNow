@@ -55,8 +55,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDropdownTile(
             title: 'Khoảng cách',
             value: settingsProvider.distanceUnit,
-            items: ['km', 'm'],
-            labels: ['Ki-lô-mét (km)', 'Mét (m)'],
+            items: ['m', 'km'],
+            labels: ['Mét (m)', 'Ki-lô-mét (km)'],
             onChanged: (value) {
               settingsProvider.setDistanceUnit(value!);
               onSettingsChanged();
@@ -90,15 +90,15 @@ class SettingsScreen extends StatelessWidget {
           ),
           SizedBox(height: 24),
 
-          // Tìm hiểu thêm
-          ListTile(
-            title: Text('Tìm hiểu thêm'),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              // Navigate to "Learn More" page
-            },
-          ),
-          SizedBox(height: 24),
+          // // Tìm hiểu thêm
+          // ListTile(
+          //   title: Text('Tìm hiểu thêm'),
+          //   trailing: Icon(Icons.arrow_forward_ios),
+          //   onTap: () {
+          //     // Navigate to "Learn More" page
+          //   },
+          // ),
+          // SizedBox(height: 24),
 
           // Khôi phục cài đặt mặc định
           ElevatedButton(

@@ -284,25 +284,11 @@ class _MainScreenState extends State<MainScreen> {
                     Container(
                       width: 80,
                       height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.wb_sunny,
-                              color: Colors.orange,
-                              size: 24,
-                            ),
-                            Icon(
-                              Icons.cloud,
-                              color: Colors.lightBlue,
-                              size: 32,
-                            ),
-                          ],
+                      decoration: BoxDecoration(shape: BoxShape.circle),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/images/icon.jpg',
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -318,7 +304,6 @@ class _MainScreenState extends State<MainScreen> {
                   ],
                 ),
               ),
-
               SizedBox(height: 30),
 
               // Search bar

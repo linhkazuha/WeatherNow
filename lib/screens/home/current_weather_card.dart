@@ -9,6 +9,9 @@ class CurrentWeatherCard extends StatelessWidget {
   final Map<String, dynamic> themeData;
   final VoidCallback onRefresh;
   final String temperatureUnit;
+  // final String windSpeedUnit;
+  // final String pressureUnit;
+  // final String distanceUnit;
 
   const CurrentWeatherCard({
     super.key,
@@ -16,6 +19,9 @@ class CurrentWeatherCard extends StatelessWidget {
     required this.themeData,
     required this.onRefresh,
     required this.temperatureUnit,
+    // required this.windSpeedUnit,
+    // required this.pressureUnit,
+    // required this.distanceUnit,
   });
 
   String _getWeatherIconUrl(String icon) {

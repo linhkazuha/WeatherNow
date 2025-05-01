@@ -4,9 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsProvider with ChangeNotifier {
   // Đơn vị
   String _temperatureUnit = 'C'; // Celsius
-  String _windSpeedUnit = 'km/h'; // Kilometers per hour
+  String _windSpeedUnit = 'm/s'; // metre/sec
   String _pressureUnit = 'hPa'; // Millibar
-  String _distanceUnit = 'km'; // Kilometers
+  String _distanceUnit = 'm'; // metres
 
   // Cài đặt khác
   bool _isWidgetEnabled = true;
@@ -39,18 +39,50 @@ class SettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setWindSpeedUnit(String unit) {
+  Future<void> setWindSpeedUnit(String unit) async {
     _windSpeedUnit = unit;
     notifyListeners();
+
+    // Lưu đơn vị tốc độ gió vào SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('windSpeedUnit', unit);
   }
 
-  void setPressureUnit(String unit) {
-    _pressureUnit = unit;
+  Future<void> loadWindSpeedUnit() async {
+    final prefs = await SharedPreferences.getInstance();
+    _windSpeedUnit =
+        prefs.getString('windSpeedUnit') ?? 'm/s'; // Mặc định là 'm/s'
     notifyListeners();
   }
 
-  void setDistanceUnit(String unit) {
+  Future<void> setPressureUnit(String unit) async {
+    _pressureUnit = unit;
+    notifyListeners();
+
+    // Lưu đơn vị áp suất vào SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('pressureUnit', unit);
+  }
+
+  Future<void> loadPressureUnit() async {
+    final prefs = await SharedPreferences.getInstance();
+    _pressureUnit =
+        prefs.getString('pressureUnit') ?? 'hPa'; // Mặc định là 'hPa'
+    notifyListeners();
+  }
+
+  Future<void> setDistanceUnit(String unit) async {
     _distanceUnit = unit;
+    notifyListeners();
+
+    // Lưu đơn vị khoảng cách vào SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('distanceUnit', unit);
+  }
+
+  Future<void> loadDistanceUnit() async {
+    final prefs = await SharedPreferences.getInstance();
+    _distanceUnit = prefs.getString('distanceUnit') ?? 'm'; // Mặc định là 'm'
     notifyListeners();
   }
 
@@ -67,9 +99,9 @@ class SettingsProvider with ChangeNotifier {
   // Khôi phục cài đặt mặc định
   void resetToDefault() {
     _temperatureUnit = 'C';
-    _windSpeedUnit = 'km/h';
+    _windSpeedUnit = 'm/s';
     _pressureUnit = 'hPa';
-    _distanceUnit = 'km';
+    _distanceUnit = 'm';
     _isWidgetEnabled = true;
     _isNotificationEnabled = true;
     notifyListeners();

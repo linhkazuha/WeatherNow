@@ -101,6 +101,9 @@ class HomeScreenState extends State<HomeScreen> {
         return Consumer<SettingsProvider>(
           builder: (context, settingsProvider, child) {
             final temperatureUnit = settingsProvider.temperatureUnit;
+            final windSpeedUnit = settingsProvider.windSpeedUnit;
+            final pressureUnit = settingsProvider.pressureUnit;
+            final distanceUnit = settingsProvider.distanceUnit;
 
             if (isLoading) {
               return Center(
@@ -215,6 +218,9 @@ class HomeScreenState extends State<HomeScreen> {
                       weather: weather,
                       themeData: themeData,
                       temperatureUnit: temperatureUnit,
+                      windSpeedUnit: windSpeedUnit,
+                      pressureUnit: pressureUnit,
+                      distanceUnit: distanceUnit,
                     ),
                   ),
 

@@ -6,12 +6,18 @@ class WeatherDetailsCard extends StatelessWidget {
   final WeatherData weather;
   final Map<String, dynamic> themeData;
   final String temperatureUnit;
+  final String windSpeedUnit;
+  final String pressureUnit;
+  final String distanceUnit;
 
   const WeatherDetailsCard({
     super.key,
     required this.weather,
     required this.themeData,
     required this.temperatureUnit,
+    required this.windSpeedUnit,
+    required this.pressureUnit,
+    required this.distanceUnit,
   });
 
   String _getUvLevelText(double uvIndex) {
@@ -63,7 +69,8 @@ class WeatherDetailsCard extends StatelessWidget {
                   icon: Icons.air,
                   iconColor: Colors.lightBlue,
                   label: 'Tốc độ gió',
-                  value: '${weather.windSpeed} m/s',
+                  value:
+                      '${convertWindSpeed(weather.windSpeed, windSpeedUnit).toStringAsFixed(2)} $windSpeedUnit',
                 ),
               ),
               const SizedBox(width: 10),
@@ -86,7 +93,8 @@ class WeatherDetailsCard extends StatelessWidget {
                   icon: Icons.compress,
                   iconColor: Colors.brown,
                   label: 'Áp suất',
-                  value: '${weather.pressure.toStringAsFixed(1)}mb',
+                  value:
+                      '${convertPressure(weather.pressure.toDouble(), pressureUnit).toStringAsFixed(1)} $pressureUnit',
                 ),
               ),
               const SizedBox(width: 10),
@@ -95,7 +103,8 @@ class WeatherDetailsCard extends StatelessWidget {
                   icon: Icons.visibility,
                   iconColor: Colors.cyan,
                   label: 'Tầm nhìn',
-                  value: '${(weather.visibility / 1000).toStringAsFixed(2)} km',
+                  value:
+                      '${convertDistance(weather.visibility.toDouble(), distanceUnit).toStringAsFixed(1)} $distanceUnit',
                 ),
               ),
             ],
