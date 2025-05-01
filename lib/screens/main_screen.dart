@@ -41,7 +41,7 @@ class _MainScreenState extends State<MainScreen> {
     'Bản Đồ',
     'Bạn có biết',
     'Cài Đặt',
-    'Thông báo & Cảnh báo',
+    'Thông báo',
   ];
 
   @override
@@ -176,7 +176,7 @@ class _MainScreenState extends State<MainScreen> {
   void _shareLocation(SavedLocation location) {
     final formatter = DateFormat('HH:mm dd/MM/yyyy');
     final currentTime = formatter.format(DateTime.now());
-    
+
     String shareText = """
   📍 ${location.name}
   🕒 Cập nhật: $currentTime
@@ -185,10 +185,9 @@ class _MainScreenState extends State<MainScreen> {
 
   Được chia sẻ từ ứng dụng WeatherNow
   """;
-    
+
     Share.share(shareText);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -236,9 +235,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildDrawer(Map<String, dynamic> themeData) {
     return Drawer(
       child: Container(
-        decoration: BoxDecoration(
-          color: themeData['sideBarColor'],
-        ),
+        decoration: BoxDecoration(color: themeData['sideBarColor']),
 
         child: SafeArea(
           child: Column(
@@ -548,7 +545,8 @@ class _MainScreenState extends State<MainScreen> {
               onSelected: (value) {
                 if (value == 'delete') {
                   _removeLocation(location.name);
-                } else if (value == 'share') {  // Thêm case mới
+                } else if (value == 'share') {
+                  // Thêm case mới
                   _shareLocation(location);
                 }
               },
