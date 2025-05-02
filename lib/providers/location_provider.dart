@@ -1,199 +1,10 @@
-// // import 'package:flutter/material.dart';
-// // import 'package:geolocator/geolocator.dart';
-// // import 'package:geocoding/geocoding.dart';
-
-// // class LocationProvider with ChangeNotifier {
-// //   Position? _currentPosition;
-// //   String _currentLocationName = 'Đang xác định...';
-
-// //   Position? get currentPosition => _currentPosition;
-// //   String get currentLocationName => _currentLocationName;
-
-// //   Future<void> fetchCurrentLocation() async {
-// //     bool serviceEnabled;
-// //     LocationPermission permission;
-
-// //     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-// //     if (!serviceEnabled) {
-// //       _currentLocationName = 'Dịch vụ vị trí bị tắt';
-// //       notifyListeners();
-// //       return;
-// //     }
-
-// //     permission = await Geolocator.checkPermission();
-// //     if (permission == LocationPermission.denied) {
-// //       permission = await Geolocator.requestPermission();
-// //       if (permission == LocationPermission.denied) {
-// //         _currentLocationName = 'Quyền truy cập vị trí bị từ chối';
-// //         notifyListeners();
-// //         return;
-// //       }
-// //     }
-
-// //     if (permission == LocationPermission.deniedForever) {
-// //       _currentLocationName = 'Quyền truy cập vị trí bị từ chối vĩnh viễn';
-// //       notifyListeners();
-// //       return;
-// //     }
-
-// //     // try {
-// //     //   _currentPosition = await Geolocator.getCurrentPosition(
-// //     //     desiredAccuracy: LocationAccuracy.high,
-// //     //   );
-
-// //     //   if (_currentPosition != null) {
-// //     //     List<Placemark> placemarks = await placemarkFromCoordinates(
-// //     //       _currentPosition!.latitude,
-// //     //       _currentPosition!.longitude,
-// //     //     );
-
-// //     //     if (placemarks.isNotEmpty) {
-// //     //       Placemark placemark = placemarks.first;
-// //     //       _currentLocationName =
-// //     //           placemark.locality ??
-// //     //           placemark.administrativeArea ??
-// //     //           'Không xác định';
-// //     //     } else {
-// //     //       _currentLocationName = 'Không thể xác định vị trí';
-// //     //     }
-// //     //   } else {
-// //     //     _currentLocationName = 'Không thể lấy vị trí';
-// //     //   }
-// //     // }
-// //     try {
-// //       List<Placemark> placemarks = await placemarkFromCoordinates(
-// //         _currentPosition!.latitude,
-// //         _currentPosition!.longitude,
-// //       );
-
-// //       if (placemarks.isNotEmpty) {
-// //         Placemark placemark = placemarks.first;
-// //         // Thêm log để kiểm tra dữ liệu placemark
-// //         print("Placemark data: $placemark");
-// //         print("Locality: ${placemark.locality}");
-// //         print("Administrative area: ${placemark.administrativeArea}");
-
-// //         // Thử sử dụng nhiều trường hơn để có tên địa điểm đầy đủ hơn
-// //         _currentLocationName = [
-// //           placemark.locality,
-// //           placemark.subAdministrativeArea,
-// //           placemark.administrativeArea,
-// //         ].where((element) => element != null && element.isNotEmpty).join(", ");
-
-// //         if (_currentLocationName.isEmpty) {
-// //           _currentLocationName = 'Không xác định';
-// //         }
-// //       }
-// //     } catch (e) {
-// //       _currentLocationName = 'Lỗi khi lấy vị trí: $e';
-// //     }
-
-// //     notifyListeners();
-// //   }
-// // }
-
-// import 'dart:async';
-
-// import 'package:flutter/material.dart';
-// import 'package:geolocator/geolocator.dart';
-// import 'package:geocoding/geocoding.dart';
-
-// class LocationProvider with ChangeNotifier {
-//   Position? _currentPosition;
-//   String _currentLocationName = 'Đang xác định...';
-
-//   Position? get currentPosition => _currentPosition;
-//   String get currentLocationName => _currentLocationName;
-
-//   Future<void> fetchCurrentLocation() async {
-//     bool serviceEnabled;
-//     LocationPermission permission;
-
-//     // Check if location services are enabled
-//     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-//     if (!serviceEnabled) {
-//       _currentLocationName = 'Dịch vụ vị trí bị tắt';
-//       notifyListeners();
-//       return;
-//     }
-
-//     // Check and request location permissions
-//     permission = await Geolocator.checkPermission();
-//     if (permission == LocationPermission.denied) {
-//       permission = await Geolocator.requestPermission();
-//       if (permission == LocationPermission.denied) {
-//         _currentLocationName = 'Quyền truy cập vị trí bị từ chối';
-//         notifyListeners();
-//         return;
-//       }
-//     }
-
-//     if (permission == LocationPermission.deniedForever) {
-//       _currentLocationName = 'Quyền truy cập vị trí bị từ chối vĩnh viễn';
-//       notifyListeners();
-//       return;
-//     }
-
-//     try {
-//       // Fetch current position with a timeout of 10 seconds
-//       _currentPosition = await Geolocator.getCurrentPosition(
-//         desiredAccuracy: LocationAccuracy.high,
-//         timeLimit: const Duration(seconds: 10), // Increase timeout to 10s
-//       ).timeout(
-//         const Duration(seconds: 10),
-//         onTimeout: () {
-//           throw TimeoutException(
-//             'Không thể lấy vị trí trong thời gian cho phép',
-//           );
-//         },
-//       );
-
-//       if (_currentPosition != null) {
-//         // Fetch placemarks to get location name
-//         List<Placemark> placemarks = await placemarkFromCoordinates(
-//           _currentPosition!.latitude,
-//           _currentPosition!.longitude,
-//         );
-
-//         if (placemarks.isNotEmpty) {
-//           Placemark placemark = placemarks.first;
-//           print("Placemark data: $placemark"); // Debug log
-//           print("Locality: ${placemark.locality}");
-//           print("Administrative area: ${placemark.administrativeArea}");
-
-//           // Build location name from available fields
-//           _currentLocationName = [
-//                 placemark.locality,
-//                 placemark.subAdministrativeArea,
-//                 placemark.administrativeArea,
-//               ]
-//               .where((element) => element != null && element.isNotEmpty)
-//               .join(", ");
-
-//           if (_currentLocationName.isEmpty) {
-//             _currentLocationName = 'Không xác định';
-//           }
-//         } else {
-//           _currentLocationName = 'Không thể xác định vị trí';
-//         }
-//       } else {
-//         _currentLocationName = 'Không thể lấy vị trí';
-//       }
-//     } catch (e) {
-//       print("Lỗi khi lấy vị trí: $e"); // Debug log
-//       _currentLocationName = 'Lỗi khi lấy vị trí: $e';
-//       _currentPosition = null; // Reset position on error
-//     }
-
-//     notifyListeners();
-//   }
-// }
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:weather_app/providers/settings_provider.dart';
 
 class LocationProvider with ChangeNotifier {
   Position? _currentPosition;
@@ -205,6 +16,16 @@ class LocationProvider with ChangeNotifier {
 
   Position? get currentPosition => _currentPosition;
   String get currentLocationName => _currentLocationName;
+
+  // Khởi tạo với việc tải vị trí đã lưu
+  LocationProvider() {
+    _loadLastKnownLocation().then((_) {
+      // Cập nhật vị trí cho thông báo nếu đã có vị trí
+      if (_currentPosition != null) {
+        _updateNotificationLocation();
+      }
+    });
+  }
 
   Future<void> fetchCurrentLocation() async {
     // Thử lấy vị trí với nhiều lần thử
@@ -246,6 +67,10 @@ class LocationProvider with ChangeNotifier {
         // Cập nhật tên vị trí
         await _updateLocationName();
         await _saveLastKnownLocation(); // Lưu vị trí thành công
+
+        // Cập nhật vị trí cho thông báo thời tiết
+        await _updateNotificationLocation();
+
         notifyListeners();
         return; // Thành công, thoát
       } catch (e) {
@@ -299,6 +124,10 @@ class LocationProvider with ChangeNotifier {
     bool success = await _loadLastKnownLocation();
     if (success && _currentPosition != null) {
       print("Sử dụng vị trí đã lưu: $_currentLocationName");
+
+      // Cập nhật vị trí cho thông báo thời tiết
+      await _updateNotificationLocation();
+
       notifyListeners();
       return;
     }
@@ -319,6 +148,10 @@ class LocationProvider with ChangeNotifier {
     _currentLocationName = 'Hà Nội';
     print("Sử dụng vị trí mặc định: $_currentLocationName");
     await _saveLastKnownLocation(); // Lưu vị trí mặc định
+
+    // Cập nhật vị trí cho thông báo thời tiết
+    await _updateNotificationLocation();
+
     notifyListeners();
   }
 
@@ -363,9 +196,66 @@ class LocationProvider with ChangeNotifier {
       await prefs.setDouble('last_latitude', _currentPosition!.latitude);
       await prefs.setDouble('last_longitude', _currentPosition!.longitude);
       await prefs.setString('last_location_name', _currentLocationName);
+
+      // Lưu thêm vị trí cho thông báo
+      await prefs.setString(
+        'notification_latitude',
+        _currentPosition!.latitude.toString(),
+      );
+      await prefs.setString(
+        'notification_longitude',
+        _currentPosition!.longitude.toString(),
+      );
+
       print("Đã lưu vị trí: $_currentLocationName");
     } catch (e) {
       print("Lỗi khi lưu vị trí: $e");
+    }
+  }
+
+  // Cập nhật vị trí cho thông báo thời tiết
+  Future<void> _updateNotificationLocation() async {
+    if (_currentPosition == null) return;
+
+    try {
+      // Lưu vị trí cho thông báo
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        'notification_latitude',
+        _currentPosition!.latitude.toString(),
+      );
+      await prefs.setString(
+        'notification_longitude',
+        _currentPosition!.longitude.toString(),
+      );
+
+      // Cập nhật vị trí trong SettingsProvider
+      try {
+        // Tạo một instance mới của SettingsProvider để cập nhật vị trí
+        final settingsProvider = SettingsProvider();
+        await settingsProvider.loadAllSettings(); // Tải cài đặt hiện tại
+
+        // Cập nhật vị trí thông báo
+        await settingsProvider.setNotificationLocation(
+          _currentPosition!.latitude.toString(),
+          _currentPosition!.longitude.toString(),
+        );
+
+        print(
+          "Đã cập nhật vị trí thông báo: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}",
+        );
+      } catch (e) {
+        print("Lỗi khi cập nhật vị trí trong SettingsProvider: $e");
+      }
+    } catch (e) {
+      print("Lỗi khi cập nhật vị trí thông báo: $e");
+    }
+  }
+
+  // Phương thức để cập nhật thủ công vị trí thông báo từ bên ngoài
+  Future<void> updateNotificationLocationManually() async {
+    if (_currentPosition != null) {
+      await _updateNotificationLocation();
     }
   }
 }

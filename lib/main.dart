@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_app/providers/settings_provider.dart';
+import 'package:weather_app/services/notification_service.dart';
 import 'firebase_options.dart';
 import 'screens/main_screen.dart';
 import 'providers/theme_provider.dart';
@@ -29,6 +30,9 @@ Future<void> main() async {
     ),
   );
   await dotenv.load(fileName: ".env");
+
+  // Khởi tạo dịch vụ thông báo
+  await NotificationService.initializeNotifications();
 
   final settingsProvider = SettingsProvider();
   await settingsProvider.loadTemperatureUnit();
