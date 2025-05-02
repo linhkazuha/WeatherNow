@@ -121,7 +121,7 @@ class WeatherDetailsCard extends StatelessWidget {
     required String value,
   }) {
     return Card(
-      elevation: 0,
+      elevation: 4,
       color: themeData['backCardColor'].withOpacity(0.8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(

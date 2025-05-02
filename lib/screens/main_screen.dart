@@ -337,20 +337,20 @@ class _MainScreenState extends State<MainScreen> {
               SizedBox(height: 20),
 
               // Tiêu đề danh sách đã lưu
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                child: Text(
-                  'Địa điểm đã lưu',
-                  style: TextStyle(
-                    color: themeData['mainText'],
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(
+              //     horizontal: 20,
+              //     vertical: 8,
+              //   ),
+              //   child: Text(
+              //     'Địa điểm đã lưu',
+              //     style: TextStyle(
+              //       color: themeData['mainText'],
+              //       fontSize: 16,
+              //       fontWeight: FontWeight.bold,
+              //     ),
+              //   ),
+              // ),
 
               // Weather location cards
               Expanded(
@@ -431,9 +431,9 @@ class _MainScreenState extends State<MainScreen> {
               side:
                   isCurrentLocation
                       ? BorderSide(
-                        color: themeData['cardLocationBorderColor'],
-                        width: 2,
-                      )
+                          color: themeData['cardLocationBorderColor'],
+                          width: 2,
+                        )
                       : BorderSide.none,
             ),
             child: InkWell(
@@ -445,6 +445,7 @@ class _MainScreenState extends State<MainScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Column(
@@ -469,8 +470,7 @@ class _MainScreenState extends State<MainScreen> {
                               ),
                             ),
                           if (location.tempMin > -273 &&
-                              location.tempMax >
-                                  -273) // Kiểm tra có dữ liệu nhiệt độ không
+                              location.tempMax > -273) // Kiểm tra có dữ liệu nhiệt độ không
                             Text(
                               '${location.tempMin.round()}° / ${location.tempMax.round()}°',
                               style: TextStyle(
@@ -491,24 +491,26 @@ class _MainScreenState extends State<MainScreen> {
                         ],
                       ),
                     ),
-                    // SỬA: Sử dụng trực tiếp dữ liệu từ location thay vì gọi Future
-                    location.temp > -273
-                        ? Text(
-                          '${location.temp.round()}°',
-                          style: TextStyle(
-                            color: themeData['mainText'],
-                            fontSize: 42,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        )
-                        : Text(
-                          '--°',
-                          style: TextStyle(
-                            color: themeData['mainText'],
-                            fontSize: 42,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                    Container(
+                      padding: EdgeInsets.only(top: 15),
+                      child: location.temp > -273
+                          ? Text(
+                              '${location.temp.round()}°',
+                              style: TextStyle(
+                                color: themeData['mainText'],
+                                fontSize: 42,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            )
+                          : Text(
+                              '--°',
+                              style: TextStyle(
+                                color: themeData['mainText'],
+                                fontSize: 42,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                    ),
                   ],
                 ),
               ),
@@ -521,7 +523,7 @@ class _MainScreenState extends State<MainScreen> {
             right: 8,
             child: PopupMenuButton<String>(
               icon: Icon(
-                Icons.more_vert,
+                Icons.more_horiz,
                 color: themeData['mainText'],
                 size: 20,
               ),
@@ -531,13 +533,11 @@ class _MainScreenState extends State<MainScreen> {
                 if (value == 'delete') {
                   _removeLocation(location.name);
                 } else if (value == 'share') {
-                  // Thêm case mới
                   _shareLocation(location);
                 }
               },
               itemBuilder:
                   (BuildContext context) => <PopupMenuEntry<String>>[
-                    // Thêm tùy chọn Chia sẻ
                     PopupMenuItem<String>(
                       value: 'share',
                       child: Row(
