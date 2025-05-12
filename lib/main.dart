@@ -4,11 +4,20 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_app/providers/settings_provider.dart';
 import 'package:weather_app/services/notification_service.dart';
+import 'package:home_widget/home_widget.dart';
+import 'package:weather_app/widgets/weather_widget_provider.dart';
 import 'firebase_options.dart';
 import 'screens/main_screen.dart';
 import 'providers/theme_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:weather_app/providers/location_provider.dart';
+
+@pragma('vm:entry-point')
+void backgroundCallback(Uri? uri) {
+  if (uri?.host == 'updateweather') {
+    // Xử lý khi widget được tương tác
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +30,11 @@ Future<void> main() async {
   } catch (e) {
     print("Firebase initialization error: $e");
   }
+
+  // Khởi tạo HomeWidget
+  await HomeWidget.registerBackgroundCallback(backgroundCallback);
+  // Khởi tạo widget với dữ liệu mặc định
+  await WeatherWidgetProvider.initWidget();
 
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
