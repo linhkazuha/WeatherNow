@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#59717D"
-    android:padding="12dp">
+    android:background="@drawable/widget_background"
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,49 +11,89 @@
         android:layout_centerInParent="true"
         android:orientation="vertical">
 
+        <!-- Phần tiêu đề và vị trí -->
         <TextView
             android:id="@+id/location_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="4dp"
+            android:gravity="center"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="Vị trí không xác định"
             android:textColor="#FFFFFF"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
+            android:layout_marginBottom="8dp" />
 
+        <!-- Phần thông tin thời tiết chính -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center_vertical">
 
-            <ImageView
-                android:id="@+id/weather_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/weather_icon_default" 
-                android:layout_marginEnd="8dp"/>
+            <!-- Icon thời tiết -->
+            <FrameLayout
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginEnd="8dp">
+                
+                <ImageView
+                    android:id="@+id/weather_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/weather_icon_default"
+                    android:scaleType="fitCenter" />
+            </FrameLayout>
 
+            <!-- Nhiệt độ -->
             <TextView
                 android:id="@+id/widget_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="--°C"
                 android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2" />
                 
         </LinearLayout>
         
+        <!-- Miêu tả thời tiết -->
         <TextView
             android:id="@+id/description_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
             android:text="không có dữ liệu"
             android:textColor="#FFFFFF"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="1" />
+
+        <!-- Thời gian cập nhật -->
+        <TextView
+            android:id="@+id/update_time_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="4dp"
+            android:text="Cập nhật lúc: --:--"
+            android:textColor="#DDFFFFFF"
+            android:textSize="12sp"
+            android:maxLines="1" />
 
     </LinearLayout>
 

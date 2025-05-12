@@ -70,15 +70,15 @@ class SettingsScreen extends StatelessWidget {
             'Cài đặt khác',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 16),
-          _buildSwitchTile(
-            title: 'Widget',
-            value: settingsProvider.isWidgetEnabled,
-            onChanged: (value) {
-              settingsProvider.setWidgetEnabled(value);
-              onSettingsChanged();
-            },
-          ),
+          // SizedBox(height: 16),
+          // _buildSwitchTile(
+          //   title: 'Widget',
+          //   value: settingsProvider.isWidgetEnabled,
+          //   onChanged: (value) {
+          //     settingsProvider.setWidgetEnabled(value);
+          //     onSettingsChanged();
+          //   },
+          // ),
           // Phần thông báo
           ExpansionTile(
             title: Text('Thông báo thời tiết'),

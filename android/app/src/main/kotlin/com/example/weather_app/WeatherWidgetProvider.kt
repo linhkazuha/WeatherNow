@@ -5,6 +5,8 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
+import java.text.SimpleDateFormat
+import java.util.*
 
 class WeatherWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(
@@ -20,11 +22,17 @@ class WeatherWidgetProvider : AppWidgetProvider() {
             val descriptionText = widgetData.getString("weather_widget_description", "không có dữ liệu") ?: "không có dữ liệu"
             val iconCode = widgetData.getString("weather_widget_icon", "01d") ?: "01d"
 
+            // Tạo thời gian cập nhật
+            val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val currentTime = dateFormat.format(Date())
+            val updateTimeText = "Cập nhật lúc: $currentTime"
+
             // Cập nhật widget
             val views = RemoteViews(context.packageName, R.layout.weather_widget_layout)
             views.setTextViewText(R.id.widget_text, weatherText)
             views.setTextViewText(R.id.location_text, locationText)
             views.setTextViewText(R.id.description_text, descriptionText)
+            views.setTextViewText(R.id.update_time_text, updateTimeText)
             
             // Thiết lập icon thời tiết
             val iconResourceId = getWeatherIconResource(iconCode)
