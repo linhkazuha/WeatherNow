@@ -6,12 +6,21 @@ class WeatherWidgetProvider {
   static const String appGroupId = 'com.example.weatherApp';
   static const String widgetKey = 'weather_widget_data';
   static const String locationKey = 'weather_widget_location';
+  static const String descriptionKey = 'weather_widget_description';
+  static const String iconKey = 'weather_widget_icon';
 
-  // Cập nhật dữ liệu cho widget
-  static Future<void> updateWidget(String text, String location) async {
+  // Cập nhật đầy đủ thông tin cho widget
+  static Future<void> updateWidget(
+    String temperature, 
+    String location, 
+    String description, 
+    String iconCode
+  ) async {
     try {
-      await HomeWidget.saveWidgetData<String>(widgetKey, text);
+      await HomeWidget.saveWidgetData<String>(widgetKey, temperature);
       await HomeWidget.saveWidgetData<String>(locationKey, location);
+      await HomeWidget.saveWidgetData<String>(descriptionKey, description);
+      await HomeWidget.saveWidgetData<String>(iconKey, iconCode);
       await HomeWidget.updateWidget(
         androidName: 'WeatherWidgetProvider',
         iOSName: '', // Không sử dụng cho iOS
@@ -23,10 +32,10 @@ class WeatherWidgetProvider {
 
   // Khởi tạo widget với dữ liệu mặc định
   static Future<void> initWidget() async {
-    await updateWidget('test thời tiết', 'Vị trí không xác định');
+    await updateWidget('--°C', 'Vị trí không xác định', 'không có dữ liệu', '01d');
   }
   
-  // Cập nhật vị trí hiện tại
+  // Cập nhật chỉ vị trí 
   static Future<void> updateLocation(String location) async {
     try {
       await HomeWidget.saveWidgetData<String>(locationKey, location);

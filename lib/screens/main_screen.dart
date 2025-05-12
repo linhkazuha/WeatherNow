@@ -193,13 +193,18 @@ class _MainScreenState extends State<MainScreen> {
     Share.share(shareText);
   }
   
-  // Hàm mới để cập nhật widget trên màn hình chính
+  // Hàm cập nhật widget trên màn hình chính
   void _updateHomeScreenWidget() {
     final homeScreenState = _homeScreenKey.currentState;
     if (homeScreenState != null && homeScreenState.weatherData != null) {
       final weatherData = homeScreenState.weatherData!;
       final tempText = '${weatherData.temp.round()}°C';
-      WeatherWidgetProvider.updateWidget(tempText, _currentLocation);
+      WeatherWidgetProvider.updateWidget(
+        tempText,
+        _currentLocation,
+        weatherData.description,
+        weatherData.icon
+      );
     } else {
       WeatherWidgetProvider.updateLocation(_currentLocation);
     }

@@ -55,9 +55,14 @@ class HomeScreenState extends State<HomeScreen> {
         widget.onLocationChanged!(data.cityName);
       }
       
-      // Cập nhật widget trên màn hình chính với dữ liệu thời tiết mới
+      // Cập nhật widget trên màn hình chính với đầy đủ thông tin
       final tempText = '${data.temp.round()}°C';
-      WeatherWidgetProvider.updateWidget(tempText, data.cityName);
+      WeatherWidgetProvider.updateWidget(
+        tempText,
+        data.cityName,
+        data.description,
+        data.icon
+      );
     } catch (e) {
       setState(() {
         errorMessage = 'Không thể lấy dữ liệu thời tiết: $e';
@@ -90,9 +95,14 @@ class HomeScreenState extends State<HomeScreen> {
         widget.onLocationChanged!(data.cityName);
       }
       
-      // Cập nhật widget trên màn hình chính với dữ liệu thời tiết mới
+      // Cập nhật widget trên màn hình chính với đầy đủ thông tin
       final tempText = '${data.temp.round()}°C';
-      WeatherWidgetProvider.updateWidget(tempText, data.cityName);
+      WeatherWidgetProvider.updateWidget(
+        tempText,
+        data.cityName,
+        data.description,
+        data.icon
+      );
     } catch (e) {
       setState(() {
         errorMessage = 'Không thể lấy dữ liệu thời tiết: $e';
