@@ -6,6 +6,7 @@ import 'package:weather_app/providers/settings_provider.dart';
 //import 'package:weather_app/utils/conversion_utils.dart';
 import 'package:weather_app/screens/maps/widgets/mini_weather_map.dart';
 import 'package:weather_app/services/weather_api_service.dart';
+import 'package:weather_app/widgets/weather_widget_provider.dart';
 
 // Import các widget con
 import 'home/current_weather_card.dart';
@@ -53,6 +54,10 @@ class HomeScreenState extends State<HomeScreen> {
       if (widget.onLocationChanged != null) {
         widget.onLocationChanged!(data.cityName);
       }
+      
+      // Cập nhật widget trên màn hình chính với dữ liệu thời tiết mới
+      final tempText = '${data.temp.round()}°C';
+      WeatherWidgetProvider.updateWidget(tempText, data.cityName);
     } catch (e) {
       setState(() {
         errorMessage = 'Không thể lấy dữ liệu thời tiết: $e';
@@ -84,6 +89,10 @@ class HomeScreenState extends State<HomeScreen> {
       if (widget.onLocationChanged != null) {
         widget.onLocationChanged!(data.cityName);
       }
+      
+      // Cập nhật widget trên màn hình chính với dữ liệu thời tiết mới
+      final tempText = '${data.temp.round()}°C';
+      WeatherWidgetProvider.updateWidget(tempText, data.cityName);
     } catch (e) {
       setState(() {
         errorMessage = 'Không thể lấy dữ liệu thời tiết: $e';

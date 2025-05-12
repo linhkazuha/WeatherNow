@@ -10,6 +10,7 @@ import 'package:weather_app/services/location_service.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:weather_app/widgets/weather_widget_provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -66,6 +67,9 @@ class _MainScreenState extends State<MainScreen> {
 
     // Lưu địa điểm mới cùng với thông tin thời tiết
     _saveCurrentLocationWeather();
+    
+    // Cập nhật widget trên màn hình chính
+    _updateHomeScreenWidget();
   }
 
   void _initPages() {
@@ -187,6 +191,18 @@ class _MainScreenState extends State<MainScreen> {
   """;
 
     Share.share(shareText);
+  }
+  
+  // Hàm mới để cập nhật widget trên màn hình chính
+  void _updateHomeScreenWidget() {
+    final homeScreenState = _homeScreenKey.currentState;
+    if (homeScreenState != null && homeScreenState.weatherData != null) {
+      final weatherData = homeScreenState.weatherData!;
+      final tempText = '${weatherData.temp.round()}°C';
+      WeatherWidgetProvider.updateWidget(tempText, _currentLocation);
+    } else {
+      WeatherWidgetProvider.updateLocation(_currentLocation);
+    }
   }
 
   @override
@@ -584,6 +600,7 @@ class _MainScreenState extends State<MainScreen> {
             )
             .then((_) {
               _loadSavedLocations();
+              _updateHomeScreenWidget(); // Cập nhật widget khi lưu thông tin thời tiết
             });
       } else {
         _locationService.saveLocation(_currentLocation).then((_) {
