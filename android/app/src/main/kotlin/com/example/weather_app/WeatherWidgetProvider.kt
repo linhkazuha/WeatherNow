@@ -1,8 +1,10 @@
 package com.example.weather_app
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.content.Intent
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
 import java.text.SimpleDateFormat
@@ -35,8 +37,31 @@ class WeatherWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.update_time_text, updateTimeText)
             
             // Thiết lập icon thời tiết
-            val iconResourceId = getWeatherIconResource(iconCode)
-            views.setImageViewResource(R.id.weather_icon, iconResourceId)
+            try {
+                val iconResourceId = getWeatherIconResource(iconCode)
+                views.setImageViewResource(R.id.weather_icon, iconResourceId)
+            } catch (e: Exception) {
+                // Sử dụng icon mặc định nếu có lỗi
+                views.setImageViewResource(R.id.weather_icon, android.R.drawable.ic_menu_compass)
+            }
+
+            // Tạo intent để mở ứng dụng khi nhấn vào widget
+            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            if (intent != null) {
+                // Đảm bảo intent này mở ứng dụng mới thay vì sử dụng instance đã có
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                
+                // Tạo PendingIntent từ intent
+                val pendingIntent = PendingIntent.getActivity(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                
+                // Thiết lập để khi nhấn vào widget sẽ mở ứng dụng
+                views.setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+            }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
@@ -45,7 +70,7 @@ class WeatherWidgetProvider : AppWidgetProvider() {
     // Hàm chuyển đổi từ mã icon thời tiết sang resource id
     private fun getWeatherIconResource(iconCode: String): Int {
         return when (iconCode) {
-            "01d" -> R.drawable.clear_day
+            "01d" -> R.drawable.clear_day 
             "01n" -> R.drawable.clear_night
             "02d" -> R.drawable.few_clouds_day
             "02n" -> R.drawable.few_clouds_night
@@ -57,7 +82,7 @@ class WeatherWidgetProvider : AppWidgetProvider() {
             "11d", "11n" -> R.drawable.thunderstorm
             "13d", "13n" -> R.drawable.snow
             "50d", "50n" -> R.drawable.mist
-            else -> R.drawable.weather_icon_default
+            else -> android.R.drawable.ic_menu_compass // Sử dụng icon mặc định từ hệ thống
         }
     }
 }
