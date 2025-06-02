@@ -7,10 +7,13 @@ import 'package:weather_app/screens/maps/weather_map_screen.dart';
 import 'package:weather_app/screens/settings/settings_screen.dart';
 import 'package:weather_app/screens/alerts/alerts_screen.dart';
 import 'package:weather_app/services/location_service.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart'; //moithem
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:weather_app/widgets/weather_widget_provider.dart';
+
+import 'package:weather_app/utils/conversion_utils.dart';
+import 'package:weather_app/providers/settings_provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -38,12 +41,12 @@ class _MainScreenState extends State<MainScreen> {
 
   // Danh sách tiêu đề động, sử dụng getter để luôn lấy giá trị mới nhất
   List<String> get _titles => [
-    _currentLocation, // Sử dụng tên địa điểm thay vì "Trang Chủ" cố định
-    'Bản Đồ',
-    'Bạn có biết',
-    'Cài Đặt',
-    'Thông báo',
-  ];
+        _currentLocation, // Sử dụng tên địa điểm thay vì "Trang Chủ" cố định
+        'Bản Đồ',
+        'Bạn có biết',
+        'Cài Đặt',
+        'Thông báo',
+      ];
 
   @override
   void initState() {
@@ -67,7 +70,7 @@ class _MainScreenState extends State<MainScreen> {
 
     // Lưu địa điểm mới cùng với thông tin thời tiết
     _saveCurrentLocationWeather();
-    
+
     // Cập nhật widget trên màn hình chính
     _updateHomeScreenWidget();
   }
@@ -96,9 +99,8 @@ class _MainScreenState extends State<MainScreen> {
     // Lấy màu từ theme thay vì sử dụng giá trị cố định
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        final Color primaryColorWithOpacity = themeProvider
-            .themeData['auxiliaryText']
-            .withOpacity(0.5);
+        final Color primaryColorWithOpacity =
+            themeProvider.themeData['auxiliaryText'].withOpacity(0.5);
 
         return Center(
           child: Column(
@@ -192,19 +194,21 @@ class _MainScreenState extends State<MainScreen> {
 
     Share.share(shareText);
   }
-  
+
   // Hàm cập nhật widget trên màn hình chính
   void _updateHomeScreenWidget() {
     final homeScreenState = _homeScreenKey.currentState;
     if (homeScreenState != null && homeScreenState.weatherData != null) {
       final weatherData = homeScreenState.weatherData!;
-      final tempText = '${weatherData.temp.round()}°C';
-      WeatherWidgetProvider.updateWidget(
-        tempText,
-        _currentLocation,
-        weatherData.description,
-        weatherData.icon
-      );
+      final temperatureUnit =
+          Provider.of<SettingsProvider>(context, listen: false)
+              .temperatureUnit; //cập nhật đơn vị đo nhiệt độ
+      final tempValue =
+          convertTemperature(weatherData.temp, temperatureUnit).round();
+      final tempText = '$tempValue°$temperatureUnit';
+      //final tempText = '${weatherData.temp.round()}°C';
+      WeatherWidgetProvider.updateWidget(tempText, _currentLocation,
+          weatherData.description, weatherData.icon);
     } else {
       WeatherWidgetProvider.updateLocation(_currentLocation);
     }
@@ -257,7 +261,6 @@ class _MainScreenState extends State<MainScreen> {
     return Drawer(
       child: Container(
         decoration: BoxDecoration(color: themeData['sideBarColor']),
-
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,24 +378,23 @@ class _MainScreenState extends State<MainScreen> {
 
               // Weather location cards
               Expanded(
-                child:
-                    _savedLocations.isEmpty
-                        ? Center(
-                          child: Text(
-                            'Chưa có địa điểm nào được lưu',
-                            style: TextStyle(
-                              color: themeData['mainText'].withOpacity(0.7),
-                            ),
+                child: _savedLocations.isEmpty
+                    ? Center(
+                        child: Text(
+                          'Chưa có địa điểm nào được lưu',
+                          style: TextStyle(
+                            color: themeData['mainText'].withOpacity(0.7),
                           ),
-                        )
-                        : ListView.builder(
-                          itemCount: _savedLocations.length,
-                          padding: EdgeInsets.only(bottom: 20),
-                          itemBuilder: (context, index) {
-                            final location = _savedLocations[index];
-                            return _buildLocationCard(location, themeData);
-                          },
                         ),
+                      )
+                    : ListView.builder(
+                        itemCount: _savedLocations.length,
+                        padding: EdgeInsets.only(bottom: 20),
+                        itemBuilder: (context, index) {
+                          final location = _savedLocations[index];
+                          return _buildLocationCard(location, themeData);
+                        },
+                      ),
               ),
 
               // "Did you know" button
@@ -439,6 +441,8 @@ class _MainScreenState extends State<MainScreen> {
   ) {
     // Kiểm tra xem địa điểm này có đang hiển thị trên trang chủ không
     final bool isCurrentLocation = _currentLocation == location.name;
+    final temperatureUnit =
+        Provider.of<SettingsProvider>(context).temperatureUnit; //moithem
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
@@ -449,13 +453,12 @@ class _MainScreenState extends State<MainScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
               // Thêm border nếu đây là địa điểm đang hiển thị
-              side:
-                  isCurrentLocation
-                      ? BorderSide(
-                          color: themeData['cardLocationBorderColor'],
-                          width: 2,
-                        )
-                      : BorderSide.none,
+              side: isCurrentLocation
+                  ? BorderSide(
+                      color: themeData['cardLocationBorderColor'],
+                      width: 2,
+                    )
+                  : BorderSide.none,
             ),
             child: InkWell(
               onTap: () => _onLocationSelected(location.name),
@@ -491,9 +494,12 @@ class _MainScreenState extends State<MainScreen> {
                               ),
                             ),
                           if (location.tempMin > -273 &&
-                              location.tempMax > -273) // Kiểm tra có dữ liệu nhiệt độ không
+                              location.tempMax >
+                                  -273) // Kiểm tra có dữ liệu nhiệt độ không
                             Text(
-                              '${location.tempMin.round()}° / ${location.tempMax.round()}°',
+                              //'${location.tempMin.round()}° / ${location.tempMax.round()}°',
+                              '${convertTemperature(location.tempMin, temperatureUnit).round()}° / '
+                              '${convertTemperature(location.tempMax, temperatureUnit).round()}°',
                               style: TextStyle(
                                 color: themeData['auxiliaryText'],
                                 fontSize: 14,
@@ -516,7 +522,7 @@ class _MainScreenState extends State<MainScreen> {
                       padding: EdgeInsets.only(top: 15),
                       child: location.temp > -273
                           ? Text(
-                              '${location.temp.round()}°',
+                              '${convertTemperature(location.temp, temperatureUnit).round()}°',
                               style: TextStyle(
                                 color: themeData['mainText'],
                                 fontSize: 42,
@@ -557,29 +563,28 @@ class _MainScreenState extends State<MainScreen> {
                   _shareLocation(location);
                 }
               },
-              itemBuilder:
-                  (BuildContext context) => <PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'share',
-                      child: Row(
-                        children: [
-                          Icon(Icons.share, color: Colors.blue, size: 20),
-                          SizedBox(width: 8),
-                          Text('Chia sẻ'),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, color: Colors.red, size: 20),
-                          SizedBox(width: 8),
-                          Text('Xóa'),
-                        ],
-                      ),
-                    ),
-                  ],
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'share',
+                  child: Row(
+                    children: [
+                      Icon(Icons.share, color: Colors.blue, size: 20),
+                      SizedBox(width: 8),
+                      Text('Chia sẻ'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: Colors.red, size: 20),
+                      SizedBox(width: 8),
+                      Text('Xóa'),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -594,19 +599,19 @@ class _MainScreenState extends State<MainScreen> {
       if (weatherData != null) {
         _locationService
             .saveLocation(
-              weatherData.cityName,
-              temp: weatherData.temp,
-              tempMin: weatherData.tempMin,
-              tempMax: weatherData.tempMax,
-              description: weatherData.description,
-              icon: weatherData.icon,
-              uvIndex: weatherData.uvIndex,
-              dewPoint: weatherData.dewPoint,
-            )
+          weatherData.cityName,
+          temp: weatherData.temp,
+          tempMin: weatherData.tempMin,
+          tempMax: weatherData.tempMax,
+          description: weatherData.description,
+          icon: weatherData.icon,
+          uvIndex: weatherData.uvIndex,
+          dewPoint: weatherData.dewPoint,
+        )
             .then((_) {
-              _loadSavedLocations();
-              _updateHomeScreenWidget(); // Cập nhật widget khi lưu thông tin thời tiết
-            });
+          _loadSavedLocations();
+          _updateHomeScreenWidget(); // Cập nhật widget khi lưu thông tin thời tiết
+        });
       } else {
         _locationService.saveLocation(_currentLocation).then((_) {
           _loadSavedLocations();

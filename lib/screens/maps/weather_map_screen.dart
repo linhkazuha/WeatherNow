@@ -7,6 +7,9 @@ import '../../../models/weather_models.dart';
 import '../../../services/weather_service.dart';
 import 'widgets/weather_time_slider.dart';
 import 'widgets/weather_layer_dropdown.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/settings_provider.dart';
+import '../../../utils/conversion_utils.dart';
 
 class WeatherMapScreen extends StatefulWidget {
   const WeatherMapScreen({super.key});
@@ -278,10 +281,19 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
     if (layer.colorMap.isEmpty) return "Min";
 
     final minKey = layer.colorMap.keys.reduce((a, b) => a < b ? a : b);
+    final settingsProvider =
+        Provider.of<SettingsProvider>(context, listen: false);
+    final temperatureUnit = settingsProvider.temperatureUnit;
+    final windSpeedUnit = settingsProvider.windSpeedUnit;
+    final pressureUnit = settingsProvider.pressureUnit;
 
     switch (layer.id) {
       case 'temp_new':
-        return "$minKey°C";
+        //return "$minKey°C";
+        final value = temperatureUnit == 'F'
+            ? convertTemperature(minKey.toDouble(), 'F').round()
+            : minKey;
+        return "$value°$temperatureUnit";
       case 'precipitation_new':
         // Điều chỉnh hiển thị cho lớp lượng mưa
         if (minKey == 0) return "0 mm";
@@ -292,11 +304,15 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
         if (minKey == 1400) return "140 mm";
         return "$minKey mm";
       case 'wind_new':
-        return "$minKey m/s";
+        //return "$minKey m/s";
+        final value = convertWindSpeed(minKey.toDouble(), windSpeedUnit);
+        return "${value.toStringAsFixed(1)} $windSpeedUnit";
       case 'clouds_new':
         return "$minKey%";
       case 'pressure_new':
-        return "${(minKey / 100).toStringAsFixed(0)} hPa";
+        //return "${(minKey / 100).toStringAsFixed(0)} hPa";
+        final value = convertPressure((minKey / 100).toDouble(), pressureUnit);
+        return "${value.toStringAsFixed(0)} $pressureUnit";
       default:
         return "$minKey";
     }
@@ -306,21 +322,34 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
     if (layer.colorMap.isEmpty) return "Max";
 
     final maxKey = layer.colorMap.keys.reduce((a, b) => a > b ? a : b);
+    final settingsProvider =
+        Provider.of<SettingsProvider>(context, listen: false);
+    final temperatureUnit = settingsProvider.temperatureUnit;
+    final windSpeedUnit = settingsProvider.windSpeedUnit;
+    final pressureUnit = settingsProvider.pressureUnit;
 
     switch (layer.id) {
       case 'temp_new':
-        return "$maxKey°C";
+        //return "$maxKey°C";
+        final value = temperatureUnit == 'F'
+            ? convertTemperature(maxKey.toDouble(), 'F').round()
+            : maxKey;
+        return "$value°$temperatureUnit";
       case 'precipitation_new':
         // Điều chỉnh hiển thị cho lớp lượng mưa
         if (maxKey == 1400) return "140 mm";
         if (maxKey == 100) return "10 mm";
         return "$maxKey mm";
       case 'wind_new':
-        return "$maxKey m/s";
+        //return "$maxKey m/s";
+        final value = convertWindSpeed(maxKey.toDouble(), windSpeedUnit);
+        return "${value.toStringAsFixed(1)} $windSpeedUnit";
       case 'clouds_new':
         return "$maxKey%";
       case 'pressure_new':
-        return "${(maxKey / 100).toStringAsFixed(0)} hPa";
+        //return "${(maxKey / 100).toStringAsFixed(0)} hPa";
+        final value = convertPressure((maxKey / 100).toDouble(), pressureUnit);
+        return "${value.toStringAsFixed(0)} $pressureUnit";
       default:
         return "$maxKey";
     }
@@ -356,6 +385,10 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
     super.build(context);
 
     final timestamp = (_selectedTime.millisecondsSinceEpoch / 1000).round();
+    // final settingsProvider = Provider.of<SettingsProvider>(context);
+    // // final temperatureUnit = settingsProvider.temperatureUnit;
+    // // final windSpeedUnit = settingsProvider.windSpeedUnit;
+    // // final pressureUnit = settingsProvider.pressureUnit;
 
     return Scaffold(
       body: Stack(
@@ -366,10 +399,9 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
             options: MapOptions(
               initialCenter: _currentPosition,
               initialZoom: 10.0,
-              onTap:
-                  _isLoading
-                      ? null
-                      : (tapPosition, point) => _getPointWeather(point),
+              onTap: _isLoading
+                  ? null
+                  : (tapPosition, point) => _getPointWeather(point),
               interactionOptions: const InteractionOptions(
                 flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
               ),
@@ -589,6 +621,12 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
   Widget _buildInfoPanel() {
     if (_selectedPoint == null) return const SizedBox.shrink();
 
+    final settingsProvider =
+        Provider.of<SettingsProvider>(context, listen: false);
+    final temperatureUnit = settingsProvider.temperatureUnit;
+    final windSpeedUnit = settingsProvider.windSpeedUnit;
+    final pressureUnit = settingsProvider.pressureUnit;
+
     return Positioned(
       top: 170,
       left: 20,
@@ -634,7 +672,8 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              '${_selectedPoint!.temperature.toStringAsFixed(1)}°C',
+              //'${_selectedPoint!.temperature.toStringAsFixed(1)}°C',
+              '${convertTemperature(_selectedPoint!.temperature, temperatureUnit).toStringAsFixed(1)}°$temperatureUnit',
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -652,11 +691,20 @@ class WeatherMapScreenState extends State<WeatherMapScreen>
             const Divider(height: 16),
             _infoRow(
               'Cảm giác như',
-              '${_selectedPoint!.feelsLike.toStringAsFixed(1)}°C',
+              //'${_selectedPoint!.feelsLike.toStringAsFixed(1)}°C',
+              '${convertTemperature(_selectedPoint!.feelsLike, temperatureUnit).toStringAsFixed(1)}°$temperatureUnit',
             ),
             _infoRow('Độ ẩm', '${_selectedPoint!.humidity}%'),
-            _infoRow('Gió', '${_selectedPoint!.windSpeed} m/s'),
-            _infoRow('Áp suất', '${_selectedPoint!.pressure} hPa'),
+            //_infoRow('Gió', '${_selectedPoint!.windSpeed} m/s'),
+            _infoRow(
+              'Gió',
+              '${convertWindSpeed(_selectedPoint!.windSpeed, windSpeedUnit).toStringAsFixed(3)} $windSpeedUnit',
+            ),
+            //_infoRow('Áp suất', '${_selectedPoint!.pressure} hPa'),
+            _infoRow(
+              'Áp suất',
+              '${convertPressure(_selectedPoint!.pressure.toDouble(), pressureUnit).toStringAsFixed(1)} $pressureUnit',
+            ),
           ],
         ),
       ),

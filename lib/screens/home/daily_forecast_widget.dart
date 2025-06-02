@@ -58,93 +58,91 @@ class DailyForecastWidget extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child:
-                dailyForecast.isEmpty
-                    ? Center(
-                      child: Text(
-                        'Không có dữ liệu dự báo theo ngày',
-                        style: TextStyle(color: themeData['mainText']),
-                      ),
-                    )
-                    : Column(
-                      children: List.generate(dailyForecast.length * 2 - 1, (
-                        index,
-                      ) {
-                        // Nếu index chẵn, hiển thị dự báo thời tiết
-                        if (index % 2 == 0) {
-                          final forecastIndex = index ~/ 2;
-                          final daily = dailyForecast[forecastIndex];
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: Text(
-                                    _formatDayOfWeek(daily.date),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: themeData['mainText'],
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Image.network(
-                                    _getWeatherIconUrl(daily.icon),
-                                    width: 40,
-                                    height: 40,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(
-                                        Icons.cloud,
-                                        size: 40,
-                                        color: themeData['auxiliaryText'],
-                                      );
-                                    },
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        '${convertTemperature(daily.tempMin, temperatureUnit).round()}°$temperatureUnit',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: themeData['mainText'],
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        '${convertTemperature(daily.tempMax, temperatureUnit).round()}°$temperatureUnit',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: themeData['mainText'],
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        } else {
-                          // Nếu index lẻ, hiển thị thanh phân cách
-                          return Divider(
-                            color:
-                                themeData['separateLine']?.withOpacity(0.3) ??
-                                Colors.grey.withOpacity(0.3),
-                            height: 1,
-                          );
-                        }
-                      }),
+            child: dailyForecast.isEmpty
+                ? Center(
+                    child: Text(
+                      'Không có dữ liệu dự báo theo ngày',
+                      style: TextStyle(color: themeData['mainText']),
                     ),
+                  )
+                : Column(
+                    children: List.generate(dailyForecast.length * 2 - 1, (
+                      index,
+                    ) {
+                      // Nếu index chẵn, hiển thị dự báo thời tiết
+                      if (index % 2 == 0) {
+                        final forecastIndex = index ~/ 2;
+                        final daily = dailyForecast[forecastIndex];
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  _formatDayOfWeek(daily.date),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: themeData['mainText'],
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Image.network(
+                                  _getWeatherIconUrl(daily.icon),
+                                  width: 40,
+                                  height: 40,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.cloud,
+                                      size: 40,
+                                      color: themeData['auxiliaryText'],
+                                    );
+                                  },
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '${convertTemperature(daily.tempMin, temperatureUnit).round()}°',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: themeData['mainText'],
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '${convertTemperature(daily.tempMax, temperatureUnit).round()}°',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: themeData['mainText'],
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        // Nếu index lẻ, hiển thị thanh phân cách
+                        return Divider(
+                          color: themeData['separateLine']?.withOpacity(0.3) ??
+                              Colors.grey.withOpacity(0.3),
+                          height: 1,
+                        );
+                      }
+                    }),
+                  ),
           ),
         ),
       ],
