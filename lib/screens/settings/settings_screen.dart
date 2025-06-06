@@ -189,7 +189,12 @@ class SettingsScreen extends StatelessWidget {
                   child: Text(
                     'Bạn sẽ nhận được thông báo thời tiết hàng ngày tại thời gian đã chọn. '
                     'Thông báo sẽ hiển thị thông tin thời tiết tại vị trí hiện tại của bạn.',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                    style: TextStyle(
+                      fontSize: 14, 
+                      color: Theme.of(context).brightness == Brightness.light 
+                        ? Color(0xFFA0C9F3) 
+                        : Color(0xFFB0B4D6)
+                    ),
                   ),
                 ),
               ),

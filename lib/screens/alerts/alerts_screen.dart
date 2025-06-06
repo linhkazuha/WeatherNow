@@ -437,7 +437,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                         Container(
                           margin: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: themeData['cardLocationColor'],
+                            color: themeData['searchFieldColor'],
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Row(
@@ -579,7 +579,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
         severityIcon = Icons.info_outline;
         break;
       default:
-        severityColor = Colors.blue;
+        severityColor = Color(0xFF003980);
         severityIcon = Icons.info_outline;
     }
 
@@ -596,7 +596,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: themeData['cardLocationColor'],
+      color: themeData['didyouknowCardColor'],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -707,13 +707,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     },
                     icon: Icon(
                       Icons.arrow_forward,
-                      color: themeData['primaryButtonColor'],
+                      color: themeData['mainText'],
                       size: 18,
                     ),
                     label: Text(
                       'Chi tiết',
                       style: TextStyle(
-                        color: themeData['primaryButtonColor'],
+                        color: themeData['mainText'],
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -724,13 +724,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     },
                     icon: Icon(
                       Icons.visibility_off,
-                      color: themeData['primaryButtonColor'],
+                      color: themeData['mainText'],
                       size: 18,
                     ),
                     label: Text(
                       'Ẩn',
                       style: TextStyle(
-                        color: themeData['primaryButtonColor'],
+                        color: themeData['mainText'],
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -746,13 +746,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   },
                   icon: Icon(
                     Icons.delete,
-                    color: themeData['primaryButtonColor'],
+                    color: themeData['mainText'],
                     size: 18,
                   ),
                   label: Text(
                     'Xóa',
                     style: TextStyle(
-                      color: themeData['primaryButtonColor'],
+                      color: themeData['mainText'],
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1053,7 +1053,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 maxHeight: MediaQuery.of(context).size.height * 0.5,
               ),
               decoration: BoxDecoration(
-                color: themeData['cardLocationColor'],
+                color: themeData['sideBarColor'],
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
