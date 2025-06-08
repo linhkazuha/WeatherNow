@@ -570,7 +570,13 @@ class _MainScreenState extends State<MainScreen> {
                     children: [
                       Icon(Icons.share, color: Colors.blue, size: 20),
                       SizedBox(width: 8),
-                      Text('Chia sẻ'),
+                      Text(
+                        'Chia sẻ',
+                        style: TextStyle(
+                          color: Colors.blue, // ← Thêm màu xanh
+                          fontWeight: FontWeight.w500, // ← Tùy chọn: làm đậm chữ
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -580,7 +586,13 @@ class _MainScreenState extends State<MainScreen> {
                     children: [
                       Icon(Icons.delete, color: Colors.red, size: 20),
                       SizedBox(width: 8),
-                      Text('Xóa'),
+                      Text(
+                        'Xóa',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight:FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ),
                 ),
