@@ -597,21 +597,31 @@ class _MainScreenState extends State<MainScreen> {
     if (_homeScreenKey.currentState != null) {
       final weatherData = _homeScreenKey.currentState?.weatherData;
       if (weatherData != null) {
+        // Sử dụng dữ liệu từ daily forecast nếu có, nếu không thì dùng current weather
+        double tempMin = weatherData.tempMin;
+        double tempMax = weatherData.tempMax;
+        
+        // Ưu tiên sử dụng dữ liệu từ daily forecast (chính xác hơn)
+        if (weatherData.dailyForecast.isNotEmpty) {
+          tempMin = weatherData.dailyForecast[0].tempMin;
+          tempMax = weatherData.dailyForecast[0].tempMax;
+        }
+        
         _locationService
             .saveLocation(
-          weatherData.cityName,
-          temp: weatherData.temp,
-          tempMin: weatherData.tempMin,
-          tempMax: weatherData.tempMax,
-          description: weatherData.description,
-          icon: weatherData.icon,
-          uvIndex: weatherData.uvIndex,
-          dewPoint: weatherData.dewPoint,
-        )
+              weatherData.cityName,
+              temp: weatherData.temp,
+              tempMin: tempMin,  // Sử dụng tempMin từ daily forecast
+              tempMax: tempMax,  // Sử dụng tempMax từ daily forecast
+              description: weatherData.description,
+              icon: weatherData.icon,
+              uvIndex: weatherData.uvIndex,
+              dewPoint: weatherData.dewPoint,
+            )
             .then((_) {
-          _loadSavedLocations();
-          _updateHomeScreenWidget(); // Cập nhật widget khi lưu thông tin thời tiết
-        });
+              _loadSavedLocations();
+              _updateHomeScreenWidget(); // Cập nhật widget khi lưu thông tin thời tiết
+            });
       } else {
         _locationService.saveLocation(_currentLocation).then((_) {
           _loadSavedLocations();

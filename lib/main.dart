@@ -15,7 +15,6 @@ import 'package:weather_app/providers/location_provider.dart';
 @pragma('vm:entry-point')
 void backgroundCallback(Uri? uri) {
   if (uri?.host == 'updateweather') {
-    // Xử lý khi widget được tương tác
   }
 }
 
@@ -39,7 +38,6 @@ Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      // Mặc định là light, sẽ cập nhật khi theme thay đổi
       statusBarIconBrightness: Brightness.light,
     ),
   );

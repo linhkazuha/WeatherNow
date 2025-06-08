@@ -9,9 +9,6 @@ class CurrentWeatherCard extends StatelessWidget {
   final Map<String, dynamic> themeData;
   final VoidCallback onRefresh;
   final String temperatureUnit;
-  // final String windSpeedUnit;
-  // final String pressureUnit;
-  // final String distanceUnit;
 
   const CurrentWeatherCard({
     super.key,
@@ -19,13 +16,26 @@ class CurrentWeatherCard extends StatelessWidget {
     required this.themeData,
     required this.onRefresh,
     required this.temperatureUnit,
-    // required this.windSpeedUnit,
-    // required this.pressureUnit,
-    // required this.distanceUnit,
   });
 
   String _getWeatherIconUrl(String icon) {
     return 'https://openweathermap.org/img/wn/$icon@2x.png';
+  }
+
+  // Hàm lấy nhiệt độ min/max từ daily forecast thay vì current weather
+  String _getMinMaxTemperature() {
+    if (weather.dailyForecast.isNotEmpty) {
+      // Sử dụng dữ liệu từ daily forecast (ngày hôm nay)
+      final todayForecast = weather.dailyForecast[0];
+      final minTemp = convertTemperature(todayForecast.tempMin, temperatureUnit).round();
+      final maxTemp = convertTemperature(todayForecast.tempMax, temperatureUnit).round();
+      return '$minTemp° / $maxTemp°$temperatureUnit';
+    } else {
+      // Fallback về current weather nếu không có daily forecast
+      final minTemp = convertTemperature(weather.tempMin, temperatureUnit).round();
+      final maxTemp = convertTemperature(weather.tempMax, temperatureUnit).round();
+      return '$minTemp° / $maxTemp°$temperatureUnit';
+    }
   }
 
   @override
@@ -73,8 +83,9 @@ class CurrentWeatherCard extends StatelessWidget {
                         color: themeData['mainText'],
                       ),
                     ),
+                    // Sử dụng hàm mới để lấy min/max từ daily forecast
                     Text(
-                      '${convertTemperature(weather.tempMin, temperatureUnit).round()}° / ${convertTemperature(weather.tempMax, temperatureUnit).round()}°$temperatureUnit',
+                      _getMinMaxTemperature(),
                       style: TextStyle(
                         fontSize: 16,
                         color: themeData['auxiliaryText'],
